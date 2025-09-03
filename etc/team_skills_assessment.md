@@ -1,104 +1,104 @@
 **React**
 Johnny
-Muhammad
+Muhammad: Proficient
 Alvin
 
 **PostgreSQL**
 Johnny
-Muhammad
+Muhammad: Novice
 Alvin
 
 **Python**
 Johnny
-Muhammad
+Muhammad: Novice
 Alvin
 
 **C**
 Johnny
-Muhammad
+Muhammad: Competent
 Alvin
 
 **C++**
 Johnny
-Muhammad
+Muhammad: Proficient
 Alvin
 
 **JavaScript**
 Johnny
-Muhammad
+Muhammad: Proficient
 Alvin
 
 **CSS**
 Johnny
-Muhammad
+Muhammad: Proficient
 Alvin
 
 **HTML**
 Johnny
-Muhammad
+Muhammad: Proficient
 Alvin
 
 **PHP**
 Johnny
-Muhammad
+Muhammad: Competent
 Alvin
 
 **Vue**
 Johnny
-Muhammad
+Muhammad: Proficient
 Alvin
 
 **Express**
 Johnny
-Muhammad
+Muhammad: Competent
 Alvin
 
 **MongoDB**
 Johnny
-Muhammad
+Muhammad: Competent
 Alvin
 
 **Node.js**
 Johnny
-Muhammad
+Muhammad: Proficient
 Alvin
 
 **Git**
 Johnny
-Muhammad
+Muhammad: Proficient
 Alvin
 
 **Firebase**
 Johnny
-Muhammad
+Muhammad: Competent
 Alvin
 
 **Flask**
 Johnny
-Muhammad
+Muhammad: None
 Alvin
 
 **Axios**
 Johnny
-Muhammad
+Muhammad: Competent
 Alvin
 
 **Google Cloud APIs**
 Johnny
-Muhammad
+Muhammad: Competent
 Alvin
 
 **AWS**
 Johnny
-Muhammad
+Muhammad: None
 Alvin
 
 **R**
 Johnny
-Muhammad
+Muhammad: Novice
 Alvin
 
 **SQL**
 Johnny
-Muhammad
+Muhammad: Novice
 Alvin
