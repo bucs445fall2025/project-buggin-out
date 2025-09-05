@@ -1,104 +1,104 @@
 **React**
 Johnny: Competent
 Muhammad: Proficient
-Alvin
+Alvin: Novice
 
 **PostgreSQL**
 Johnny: Novice
 Muhammad: Novice
-Alvin
+Alvin: Novice
 
 **Python**
 Johnny: Proficient
 Muhammad: Novice
-Alvin
+Alvin: Competent
 
 **C**
 Johnny: Competent
 Muhammad: Competent
-Alvin
+Alvin: Competent
 
 **C++**
 Johnny: Competent
 Muhammad: Proficient
-Alvin
+Alvin: Competent
 
 **JavaScript**
 Johnny: Competent
 Muhammad: Proficient
-Alvin
+Alvin: Competent
 
 **CSS**
 Johnny: Competent
 Muhammad: Proficient
-Alvin
+Alvin: Competent
 
 **HTML**
 Johnny: Competent
 Muhammad: Proficient
-Alvin
+Alvin: Competent
 
 **PHP**
 Johnny: None
 Muhammad: Competent
-Alvin
+Alvin: None
 
 **Vue**
 Johnny: None
 Muhammad: Proficient
-Alvin
+Alvin: None
 
 **Express**
 Johnny: None
 Muhammad: Competent
-Alvin
+Alvin: None
 
 **MongoDB**
 Johnny: None
 Muhammad: Competent
-Alvin
+Alvin: Novice
 
 **Node.js**
 Johnny: None
 Muhammad: Proficient
-Alvin
+Alvin: None
 
 **Git**
 Johnny: Competent
 Muhammad: Proficient
-Alvin
+Alvin: Competent
 
 **Firebase**
 Johnny: None
 Muhammad: Competent
-Alvin
+Alvin: None
 
 **Flask**
 Johnny: Competent
 Muhammad: None
-Alvin
+Alvin: Novice
 
 **Axios**
 Johnny: Novice
 Muhammad: Competent
-Alvin
+Alvin: None
 
 **Google Cloud APIs**
 Johnny: None
 Muhammad: Competent
-Alvin
+Alvin: None
 
 **AWS**
 Johnny: Novice
 Muhammad: None
-Alvin
+Alvin: None
 
 **R**
 Johnny: Novice
 Muhammad: Novice
-Alvin
+Alvin: Novice
 
 **SQL**
 Johnny: Novice
 Muhammad: Novice
-Alvin
+Alvin: Novice
