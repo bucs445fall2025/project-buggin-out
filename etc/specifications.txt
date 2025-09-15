@@ -1,5 +1,7 @@
     How will you use this application? 
     This application will enable users to find, save, and plan meals easily. It will help users organize their meals for the week, generate grocery lists, and share recipes with friends or family.
+    We will probably have 2 kinds of application experiences, one for students who are trying to map out a plan for the week, and one for people who are trying to find new recipes to try out and cook for themselves, mainly people off campus.
+
 
     Where would the user be located physically when using this application?
     Anywhere that a user has access has a device, mainly when they are at home or doing grrocery shopping.
