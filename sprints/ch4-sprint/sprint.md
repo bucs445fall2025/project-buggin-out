@@ -2,70 +2,76 @@
 
 *note: replace anything surrounded by << >> and **remove** the << >>*
 
-**Attended**: << record the team members in attendance (virtual counts as long as they are participating) >>
+**Attended**: Johnny Lu, Alvin Thomas, Muhammad Chaudhry 
 
-**DATE**: << meeting date >>
+**DATE**: 10/4/2025
 
 ***
 
-## Sprint << num >> Review
+## Sprint 3 Review
 
 ### SRS Sections Updated
 
-<< List any SRS sections that were updated in the last sprint >>
+Functional and nonfunctional requirements were added
 
 ### User Story
 
-<< Corresponding User Stories completed in this sprint >>
+As the user, I would be able to look at the UI design that was created and figure out the workflow. 
 
 ### Sprint Requirements Attempted
 
-<< The corresponding SRS requirement that the team completed in the last sprint >>
+UI design
 
 ### Completed Requirements
 
-<< The work that's been completed in this sprint >>
+Initial design and wireframe
 
 ### Incomplete Requirements
 
-<< The work that has not been completed in this sprint. Be VERY detailed and specific regarding what isn't working and what needs to be completed >>
+None
 
 ### The summary of the entire project
 
-<< A general overview of the entire project >>
+The overall basic UI layout 
 
 ***
 
-## Sprint << num >> Planning
+## Sprint 4 Planning
 
 ## Requirements Flex
 
-<< # >>/5 requirement flexes remaining
+5/5 requirement flexes remaining
 
 ## Technical Debt
 
-<< Any requirements from the previous sprint that are using a technical flex >>
+None
 
 ### Requirement Target
 
-<< The corresponding SRS requirement that our team will be complete in next sprint >>
+Basic UI programmed - navbar, different pages (landing page, login/sign up page, recipe page, macro tracker page, profile, account set up, grocery list)
+
 
 ### User Stories
 
-<< Corresponding User Stories >>
+As the user, I would be able to navigate through the different pages accessible from the navbar. I would be able to view the basic layout of each page listed. 
 
 ### Planning
 
-<< Our team's detailed plan to complete the sprint >>
+We will meet Wednesday (10/8) and Friday (10/10) at 6PM to work on the project together.
 
 ### Action Items
 
-<< A list of things that need to happen in our for our team to complete the sprint >>
+Assign tasks to each member
+Check up on how progress is going throughout the week
+Communicate about meeting times
+Deadline should be saturday for most things to be finished
 
 ### Issues and Risks
 
-<< A list of potential obstacles that could keep us from completing the sprint and what's being done about them >>
+Other classwork (midterms, class projects)
 
 ### Team Work Assignments
 
-<< A list of each team member and their works assignments for this sprint >>
+Johnny - Login/sign up page, grocery list
+Muhammad - Navbar, recipe page, landing page
+Alvin - Macro tracker page, profile, account set up
