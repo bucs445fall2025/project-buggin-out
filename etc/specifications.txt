@@ -1,0 +1,41 @@
+    How will you use this application? 
+    This application will enable users to find, save, and plan meals easily. It will help users organize their meals for the week, generate grocery lists, and share recipes with friends or family.
+    We will probably have 2 kinds of application experiences, one for students who are trying to map out a plan for the week, and one for people who are trying to find new recipes to try out and cook for themselves, mainly people off campus.
+
+
+    Where would the user be located physically when using this application?
+    Anywhere that a user has access has a device, mainly when they are at home or doing grrocery shopping.
+
+    Where would the results be visible?
+    the results will be visible in the kitchen when you have many different tasty meals.
+
+    When will this application be used?
+    Whenever you are hungry and dont want eat the same 4 meals over and over again. It provides the user an efficient
+    way to learn new recipes and instantly apply it. 
+
+    When can the application fail?
+    If the API is down, if the user puts in an input that doesn't make sense, or user isn't properly authorized. 
+
+    Who is my user?
+    Anyone who cooks and they want to either learn recipes or track and plan their meals.
+
+    Who will deliver the inputs for the application?
+    The user
+
+    Who will receive the outputs of the application?
+    The user
+
+    What does this application need to do?
+    It needs to be able to allow the user to create an account or sign in. Allow the user to search for recipes or browse through them in a grid. Users should be able to save recipes that they found, and they can add their own so that they are able to create a weekly meal plan. We can have summaries of each days meals with nutrition facts. At the end of the week you can get an email based on your meals. The user should be able to generate a grocery list based on the meals they have planned for the week. The user should be able to share recipes with other users. 
+
+    What are the components of this application?
+    The front end consists of React, it will also use a third party authentication service to manage user accounts. The backend will be built with Node.ks and Express.js. The users data will be stored in a SQL database using postgreSQL. We will use a third party API to get recipes and their details.
+
+    What needs to happen next?
+    We are probably going to split up but first have a UI design to figure out what our wireframe for the application will look like. Then after that we will test the API to see what kind of data we can work with. After that we can start building the backend and frontend.
+
+    What must happen before the next step?
+    Communcation between team members to make sure everyone is on the same page. Make sure everyones docker setup is ready to go.
+
+    What needs to be tracked?
+    Our weekly scrims will help us track our progress and keep the workload manageable.
