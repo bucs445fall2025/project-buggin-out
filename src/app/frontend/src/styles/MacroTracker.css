@@ -1,0 +1,79 @@
+/* src/styles/MacroTracker.css */
+.mtkt-container {
+  background: #f0f0f0;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.mtkt-shell {
+  margin-top: 4rem; /* clear navbar */
+  width: min(1200px, 94vw);
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 1.25rem;
+}
+.mtkt-left {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 6px rgba(0,0,0,.08);
+}
+.mtkt-title { margin: 0 0 .5rem 0; }
+.mtkt-search input {
+  width: 90%;
+  padding: .65rem .8rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+  outline: none;
+}
+.mtkt-list { list-style: none; margin: .9rem 0 0 0; padding: 0; display: grid; gap: .5rem; }
+.mtkt-item {
+  background: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  padding: .7rem .8rem;
+  cursor: pointer;
+  transition: transform .06s ease, box-shadow .12s ease, border-color .12s ease;
+}
+.mtkt-item:hover { box-shadow: 0 2px 5px rgba(0,0,0,.06); border-color: #d6d6d6; }
+.mtkt-item.active { border-color: #646cff; box-shadow: 0 0 0 2px rgba(100,108,255,.15) inset; }
+.mtkt-item-name { font-weight: 600; }
+.mtkt-empty { color: #666; padding: .6rem; }
+
+.mtkt-right { display: flex; align-items: stretch; }
+.mtkt-placeholder {
+  background: #f9f9f9;
+  border: 1px dashed #cfcfcf;
+  border-radius: 12px;
+  padding: 24px;
+  width: 100%;
+  color: #666;
+  display: grid;
+  place-items: center;
+}
+.mtkt-card {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  width: 100%;
+  box-shadow: 0 4px 6px rgba(0,0,0,.08);
+}
+.mtkt-recipe-name { margin: 0 0 .75rem 0; }
+.mtkt-macros {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  gap: 1rem;
+}
+.mtkt-macro-tile {
+  background: white;
+  border: 1px solid #e6e6e6;
+  border-radius: 12px;
+  padding: 16px;
+}
+.mtkt-macro-label { color: #444; margin-bottom: .35rem; }
+.mtkt-macro-value { font-size: 1.75rem; font-weight: 800; color: #222; }
+.mtkt-unit { font-size: .95rem; margin-left: .25rem; color: #666; }
