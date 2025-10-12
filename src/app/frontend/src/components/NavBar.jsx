@@ -13,6 +13,9 @@ function NavBar() {
             <Link to="/recipes">Recipes</Link>
           </li>
           <li>
+            <Link to="/grocery">Grocery</Link>
+          </li>
+          <li>
             <Link to="/macro">Macro Tracker</Link>
           </li>
           <li>
