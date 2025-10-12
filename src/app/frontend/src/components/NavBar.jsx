@@ -24,6 +24,12 @@ function NavBar() {
           <li>
             <Link to="/about">About</Link>
           </li>
+          <li>
+            <Link to="/signup">Sign Up</Link>
+          </li>
+          <li>
+            <Link to="/login">Login</Link>
+          </li>
         </div>
         {/* Add more links for other pages in the `pages` folder */}
       </ul>
