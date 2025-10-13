@@ -21,8 +21,9 @@
 
 ## Requirements Attempted in next Sprint
 
-- UI Refinements
-- Successfully Access data from an API
+- Add Basic Landing Page
+- User Accounts with enabled login
+  - email verification
 
 ## Milestone Status
 
@@ -31,5 +32,7 @@
 ## Requested Changes
 
 ## Additional Notes
+
+
 
 
