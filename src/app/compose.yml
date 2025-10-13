@@ -12,7 +12,7 @@ services:
       - CHOKIDAR_INTERVAL=100
     ports:
       - "3000:3000"
-    command: ["sh", "-c", "npm run dev"]
+    command: ["sh", "-c", "npm install && npm run dev"]
     depends_on:
       - backend
   # Node.js + Express Backend
