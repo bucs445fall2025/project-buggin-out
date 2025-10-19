@@ -24,7 +24,7 @@ services:
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
     ports:
-      - "5001:5001"
+      - "5000:5000"
     command:
       ["sh", "-c", "npm install -g nodemon && npm install && npm run dev"]
     environment:
