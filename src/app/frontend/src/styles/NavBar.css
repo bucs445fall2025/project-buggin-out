@@ -27,10 +27,12 @@
   display: flex;
   margin-left: auto;
   margin-right: 20px;
+  text-decoration: none;
 }
 
 .navbar-signup {
   margin-right: 20px;
+  text-decoration: none;
 }
 
 .divider {
