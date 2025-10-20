@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import "../styles/MacroTracker.css";
 
 const SAVED_KEY = "saved-recipes"; // [{id,title,image, macros?}]
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3001";
 
 export default function MacroTracker() {
   // search box + results
@@ -40,7 +40,9 @@ export default function MacroTracker() {
     setSearching(true);
     try {
       const res = await fetch(
-        `${API_BASE}/api/recipes/search?query=${encodeURIComponent(query || "pasta")}`
+        `${API_BASE}/api/recipes/search?query=${encodeURIComponent(
+          query || "pasta"
+        )}`
       );
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Search failed");
@@ -140,13 +142,19 @@ export default function MacroTracker() {
                   <img src={r.image} alt="" />
                   <span className="mtkt-item-name">{r.title}</span>
                 </button>
-                <button className="mtkt-remove" onClick={() => removeSaved(r.id)} title="Remove">
+                <button
+                  className="mtkt-remove"
+                  onClick={() => removeSaved(r.id)}
+                  title="Remove"
+                >
                   ✕
                 </button>
               </li>
             ))}
             {saved.length === 0 && (
-              <li className="mtkt-empty">No saved recipes yet. Search on top and click “Save”.</li>
+              <li className="mtkt-empty">
+                No saved recipes yet. Search on top and click “Save”.
+              </li>
             )}
           </ul>
         </aside>
@@ -168,12 +176,22 @@ export default function MacroTracker() {
                 <div className="mtkt-loading">Loading macros…</div>
               ) : selected.macros && hasAllMacros(selected.macros) ? (
                 <div className="mtkt-macros">
-                  <MacroTile label="Protein" value={selected.macros.protein} unit="g" />
-                  <MacroTile label="Carbs"   value={selected.macros.carbs}   unit="g" />
-                  <MacroTile label="Fat"     value={selected.macros.fat}     unit="g" />
+                  <MacroTile
+                    label="Protein"
+                    value={selected.macros.protein}
+                    unit="g"
+                  />
+                  <MacroTile
+                    label="Carbs"
+                    value={selected.macros.carbs}
+                    unit="g"
+                  />
+                  <MacroTile label="Fat" value={selected.macros.fat} unit="g" />
                 </div>
               ) : (
-                <div className="mtkt-note">No macro data yet for this recipe.</div>
+                <div className="mtkt-note">
+                  No macro data yet for this recipe.
+                </div>
               )}
             </div>
           )}
@@ -227,7 +245,11 @@ function MacroTile({ label, value, unit }) {
 function pickMacrosFromResult(r) {
   const n = r?.nutrition?.nutrients || [];
   const get = (name) => Math.round(n.find((x) => x.name === name)?.amount || 0);
-  const m = { protein: get("Protein"), carbs: get("Carbohydrates"), fat: get("Fat") };
+  const m = {
+    protein: get("Protein"),
+    carbs: get("Carbohydrates"),
+    fat: get("Fat"),
+  };
   return hasAllMacros(m) ? m : null;
 }
 function hasAllMacros(m) {

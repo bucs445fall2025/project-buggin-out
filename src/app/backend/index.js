@@ -1,45 +1,57 @@
-// load api key from env
+// ---------------------- Load environment variables ----------------------
 require("dotenv").config();
 
-const cors = require("cors");
+// ---------------------- Imports ----------------------
 const express = require("express");
+const cors = require("cors");
 const axios = require("axios");
 
+// ---------------------- App setup ----------------------
 const app = express();
-const port = 5000;
+const port = process.env.PORT || 3001;
 
-// middleware to parse JSON
+// Apply CORS BEFORE routes
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
+console.log("CORS middleware applied!");
+
+// Parse JSON request bodies
 app.use(express.json());
-app.use(cors());
 
+// ---------------------- Spoonacular API setup ----------------------
 const SPOON_API_KEY = process.env.SPOON_API_KEY;
 
-// test, temporarily setting to default page
+const spoon = axios.create({
+  baseURL: "https://api.spoonacular.com",
+  // API Key is automatically included in all requests made with this instance
+  params: { apiKey: SPOON_API_KEY },
+});
+
+// ---------------------- Routes ----------------------
+
+// Root test route
 app.get("/", async (req, res) => {
-  const url = `https://api.spoonacular.com/recipes/complexSearch?query=pasta&apiKey=${SPOON_API_KEY}`
   try {
+    // Note: The root test route is not using the 'spoon' axios instance for demonstration,
+    // but the API key is correctly appended by the client in this case.
+    const url = `https://api.spoonacular.com/recipes/complexSearch?query=pasta&apiKey=${SPOON_API_KEY}`;
     const response = await axios.get(url);
-    res.json(response.data); // display in browser
+    res.json(response.data);
   } catch (error) {
-    console.error("Error fetching data:", error.response?.data || error.message);
+    console.error(
+      "Error fetching data:",
+      error.response?.data || error.message,
+      error.config?.url
+    );
     res.status(500).json({ error: "Failed to fetch from Spoonacular" });
   }
 });
 
-// start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
-
-// ---------- Spoonacular axios client ----------
-const spoon = axios.create({
-  baseURL: "https://api.spoonacular.com",
-  params: { apiKey: process.env.SPOON_API_KEY },
-});
-
-// ---------- Routes ----------
-
-// Search recipes (Spoonacular complexSearch + info + nutrition summary)
+// Search recipes (complexSearch + info + nutrition)
 app.get("/api/recipes/search", async (req, res) => {
   try {
     const { query = "pasta", number = 10 } = req.query;
@@ -48,11 +60,12 @@ app.get("/api/recipes/search", async (req, res) => {
         query,
         number,
         addRecipeInformation: true,
-        addRecipeNutrition: true, // returns top-level nutrients summary
+        addRecipeNutrition: true,
       },
     });
     res.json(data);
   } catch (error) {
+    console.error("Search route error:", error.response?.data || error.message);
     res.status(error.response?.status || 500).json({
       error: "Failed to fetch from Spoonacular",
       details: error.response?.data || error.message,
@@ -60,7 +73,45 @@ app.get("/api/recipes/search", async (req, res) => {
   }
 });
 
-// Get macros for a recipe by ID (more robust: pulls full nutrition list and extracts P/C/F)
+// ---------------------- NEW ROUTE: Get Random Recipes ----------------------
+app.get("/api/recipes/random", async (req, res) => {
+  try {
+    // Destructure query parameters with sensible defaults
+    const {
+      number = 6, // Default to 6 recipes for a nice display
+      includeNutrition = true,
+      "include-tags": includeTags,
+      "exclude-tags": excludeTags,
+    } = req.query;
+
+    // Use the 'spoon' instance, which automatically includes the API Key
+    const { data } = await spoon.get("/recipes/random", {
+      params: {
+        number,
+        includeNutrition,
+        // Only include tags if they are provided, otherwise Spoonacular will ignore them
+        ...(includeTags && { "include-tags": includeTags }),
+        ...(excludeTags && { "exclude-tags": excludeTags }),
+      },
+    });
+
+    // The Spoonacular response for 'random' is an object containing a 'recipes' array,
+    // which is the format the frontend expects.
+    res.json(data);
+  } catch (error) {
+    console.error(
+      "Random recipe route error:",
+      error.response?.data || error.message
+    );
+    res.status(error.response?.status || 500).json({
+      error: "Failed to fetch random recipes from Spoonacular",
+      details: error.response?.data || error.message,
+    });
+  }
+});
+// ----------------------------------------------------------------------------
+
+// Get macros for a recipe by ID
 app.get("/api/recipes/:id/macros", async (req, res) => {
   try {
     const { id } = req.params;
@@ -68,7 +119,6 @@ app.get("/api/recipes/:id/macros", async (req, res) => {
       params: { includeNutrition: true },
     });
 
-    // Find Protein, Carbohydrates, Fat in the nutrients array
     const nutrients = data?.nutrition?.nutrients || [];
     const get = (name) => nutrients.find((n) => n.name === name)?.amount || 0;
 
@@ -80,6 +130,7 @@ app.get("/api/recipes/:id/macros", async (req, res) => {
 
     res.json({ id, title: data.title, image: data.image, macros });
   } catch (error) {
+    console.error("Macros route error:", error.response?.data || error.message);
     res.status(error.response?.status || 500).json({
       error: "Failed to fetch recipe macros",
       details: error.response?.data || error.message,
@@ -87,3 +138,7 @@ app.get("/api/recipes/:id/macros", async (req, res) => {
   }
 });
 
+// ---------------------- Start server ----------------------
+app.listen(port, () => {
+  console.log(`✅ Server is running at: http://localhost:${port}`);
+});
