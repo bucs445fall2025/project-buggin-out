@@ -16,7 +16,7 @@ Functional and nonfunctional requirements
 
 ### User Story
 
-As the user, I am able to see the actual baseline design of the website.
+As the user, I will be able to find different recipes while clearing understanding what each section of the website does.
 
 ### Sprint Requirements Attempted
 
