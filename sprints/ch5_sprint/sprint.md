@@ -37,7 +37,7 @@ Basic UI design that was drafted has been implemented and is displayed on applic
 
 ***
 
-## Sprint 6 Planning
+## Sprint 5 Planning
 
 ## Requirements Flex
 
