@@ -23,6 +23,16 @@
   text-decoration: underline;
 }
 
+.right-links {
+  display: flex;
+  margin-left: auto;
+  margin-right: 20px;
+}
+
+.navbar-signup {
+  margin-right: 20px;
+}
+
 .divider {
   position: absolute; /* Position relative to the navbar */
   top: 50%; /* Vertically center within the navbar */

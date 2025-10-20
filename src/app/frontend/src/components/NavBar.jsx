@@ -8,6 +8,10 @@ function NavBar() {
         <li>
           <Link to="/">Buggin Out</Link>
         </li>
+        <ul className="right-links">
+          <li className="navbar-signup"><Link to="/signup">Sign Up</Link></li>
+          <li><Link to="/login">Login</Link></li>
+        </ul>
         <div className="divider">
           <li id="pages">
             <Link to="/recipes">Recipes</Link>
@@ -26,12 +30,6 @@ function NavBar() {
           </li>
           <li>
             <Link to="/about">About</Link>
-          </li>
-          <li>
-            <Link to="/signup">Sign Up</Link>
-          </li>
-          <li>
-            <Link to="/login">Login</Link>
           </li>
         </div>
         {/* Add more links for other pages in the `pages` folder */}
