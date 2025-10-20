@@ -18,7 +18,7 @@ A list of features, function or non-functional, you would like to add in the fut
   >>
   
 ## SRS
-[document](url to google doc)
+[document](https://docs.google.com/document/d/1OlTKNSUKXr8yh3ZJ1dgo0_jMl57zAS1IpWYFoDg3q2g/edit?tab=t.0)
   
 ### Prerequisites
 * [Docker](https://www.docker.com/)
