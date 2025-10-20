@@ -30,3 +30,60 @@ app.get("/", async (req, res) => {
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
+
+// ---------- Spoonacular axios client ----------
+const spoon = axios.create({
+  baseURL: "https://api.spoonacular.com",
+  params: { apiKey: process.env.SPOON_API_KEY },
+});
+
+// ---------- Routes ----------
+
+// Search recipes (Spoonacular complexSearch + info + nutrition summary)
+app.get("/api/recipes/search", async (req, res) => {
+  try {
+    const { query = "pasta", number = 10 } = req.query;
+    const { data } = await spoon.get("/recipes/complexSearch", {
+      params: {
+        query,
+        number,
+        addRecipeInformation: true,
+        addRecipeNutrition: true, // returns top-level nutrients summary
+      },
+    });
+    res.json(data);
+  } catch (error) {
+    res.status(error.response?.status || 500).json({
+      error: "Failed to fetch from Spoonacular",
+      details: error.response?.data || error.message,
+    });
+  }
+});
+
+// Get macros for a recipe by ID (more robust: pulls full nutrition list and extracts P/C/F)
+app.get("/api/recipes/:id/macros", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data } = await spoon.get(`/recipes/${id}/information`, {
+      params: { includeNutrition: true },
+    });
+
+    // Find Protein, Carbohydrates, Fat in the nutrients array
+    const nutrients = data?.nutrition?.nutrients || [];
+    const get = (name) => nutrients.find((n) => n.name === name)?.amount || 0;
+
+    const macros = {
+      protein: Math.round(get("Protein")),
+      carbs: Math.round(get("Carbohydrates")),
+      fat: Math.round(get("Fat")),
+    };
+
+    res.json({ id, title: data.title, image: data.image, macros });
+  } catch (error) {
+    res.status(error.response?.status || 500).json({
+      error: "Failed to fetch recipe macros",
+      details: error.response?.data || error.message,
+    });
+  }
+});
+
