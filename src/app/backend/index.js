@@ -6,6 +6,33 @@ const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
 
+const { PrismaClient } = require("@prisma/client");
+const prisma = new PrismaClient();
+
+// === NEW: Auth imports (bcrypt for hashing, jwt for tokens)
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+// === NEW: JWT secret from env (dev fallback)
+const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
+
+// === NEW: Auth helpers
+function signToken(user) {
+  return jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, {
+    expiresIn: "7d",
+  });
+}
+function requireAuth(req, res, next) {
+  const h = req.headers.authorization || "";
+  const token = h.startsWith("Bearer ") ? h.slice(7) : null;
+  if (!token) return res.status(401).json({ error: "Missing token" });
+  try {
+    req.user = jwt.verify(token, JWT_SECRET);
+    next();
+  } catch {
+    return res.status(401).json({ error: "Invalid token" });
+  }
+}
+
 // ---------------------- App setup ----------------------
 const app = express();
 const port = process.env.PORT || 3001;
@@ -49,6 +76,89 @@ app.get("/", async (req, res) => {
     );
     res.status(500).json({ error: "Failed to fetch from Spoonacular" });
   }
+});
+
+// === NEW: AUTH ROUTES =====================================================
+
+// POST /api/auth/signup {email, password, displayName?}
+app.post("/api/auth/signup", async (req, res) => {
+  const { email, password, displayName = "" } = req.body || {};
+  if (!email || !password)
+    return res.status(400).json({ error: "email and password required" });
+
+  try {
+    const hash = await bcrypt.hash(password, 10);
+    const user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash: hash,
+        profile: { create: { displayName } },
+      },
+      include: { profile: true },
+    });
+    const token = signToken(user);
+    res.json({
+      token,
+      user: { id: user.id, email: user.email },
+      profile: user.profile,
+    });
+  } catch (e) {
+    if (e.code === "P2002")
+      return res.status(409).json({ error: "Email already registered" });
+    console.error("Signup error:", e);
+    res.status(500).json({ error: "Signup failed" });
+  }
+});
+
+// POST /api/auth/login {email, password}
+app.post("/api/auth/login", async (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email || !password)
+    return res.status(400).json({ error: "email and password required" });
+
+  try {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) return res.status(401).json({ error: "Invalid credentials" });
+
+    const ok = await bcrypt.compare(password, user.passwordHash);
+    if (!ok) return res.status(401).json({ error: "Invalid credentials" });
+
+    const token = signToken(user);
+    res.json({ token, user: { id: user.id, email: user.email } });
+  } catch (e) {
+    console.error("Login error:", e);
+    res.status(500).json({ error: "Login failed" });
+  }
+});
+
+// === NEW: ME/PROFILE (protected) =========================================
+
+// GET /api/me
+app.get("/api/me", requireAuth, async (req, res) => {
+  const me = await prisma.user.findUnique({
+    where: { id: req.user.sub },
+    select: { id: true, email: true, profile: true },
+  });
+  res.json(me);
+});
+
+// GET /api/profile
+app.get("/api/profile", requireAuth, async (req, res) => {
+  const profile = await prisma.profile.findUnique({
+    where: { userId: req.user.sub },
+  });
+  res.json(profile);
+});
+
+// PUT /api/profile {displayName?, bio?, avatarUrl?}
+app.put("/api/profile", requireAuth, async (req, res) => {
+  const { displayName, bio, avatarUrl } = req.body || {};
+  const profile = await prisma.profile.upsert({
+    where: { userId: req.user.sub },
+    update: { displayName, bio, avatarUrl },
+    create: { userId: req.user.sub, displayName: displayName || "" },
+  });
+  res.json(profile);
 });
 
 // Search recipes (complexSearch + info + nutrition)

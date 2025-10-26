@@ -24,7 +24,7 @@ services:
       - ./backend:/usr/src/app
       - /usr/src/app/node_modules
     ports:
-      - "5000:5000"
+      - "3001:3001"
     command:
       ["sh", "-c", "npm install -g nodemon && npm install && npm run dev"]
     environment:
@@ -32,6 +32,7 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=postgres
       - DB_NAME=mydb
+      - DATABASE_URL=postgresql://postgres:postgres@database:5432/mydb?schema=public
     depends_on:
       - database
 
