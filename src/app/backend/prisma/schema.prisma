@@ -20,6 +20,8 @@ model User {
   createdAt    DateTime  @default(now())
   profile      Profile?
   comments     Comment[]  
+  recipes      Recipe[]
+  savedRecipes SavedRecipe[]
 }
 
 model Profile {
@@ -39,6 +41,53 @@ model Comment {
   // the relationship to the user, which user comment belongs to 
   userId Int
   user   User @relation(fields: [userId], references: [id])
+}
+
+model Recipe {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  createdAt   DateTime  @default(now())
+  userId      Int
+  user        User      @relation(fields: [userId], references: [id])
+  savedRecipes SavedRecipe[]
+  groceryIngredients Grocery[]
+  macroEntries Macro[]
+}
+
+model SavedRecipe {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  recipeId Int
+
+  // the relationship to the user, which user comment belongs to 
+  user     User   @relation(fields: [userId], references: [id])
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+}
+
+// table for groceries, ingredients are listed 
+model Grocery {
+  id        Int      @id @default(autoincrement())
+  name      String
+  quantity  Float
+  unit      String
+
+  //relation to the specific recipe 
+  recipeId  Int
+  recipe    Recipe   @relation(fields: [recipeId], references: [id])
+}
+
+// table for macros, contains all macro information for a recipe 
+model Macro {
+  id        Int      @id @default(autoincrement())
+  calories  Float
+  protein   Float
+  carbs     Float
+  fat       Float
+
+  //relation to the specific recipe 
+  recipeId  Int
+  recipe    Recipe   @relation(fields: [recipeId], references: [id])
 }
 
 
