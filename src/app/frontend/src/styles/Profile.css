@@ -1,0 +1,115 @@
+/* src/styles/Profile.css */
+.pf-container {
+  background: #f0f0f0;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.pf-shell {
+  margin-top: 4rem; /* clear navbar */
+  width: min(1200px, 94vw);
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.25rem;
+}
+
+/* LEFT CARD */
+.pf-left {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 4px 6px rgba(0,0,0,.08);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.pf-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #eaeaea, #d9d9d9);
+  border: 1px solid #d0d0d0;
+  margin: 6px auto 12px;
+}
+.pf-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-align: left;
+  margin-bottom: 6px;
+}
+.pf-bio {
+  color: #555;
+  line-height: 1.35;
+  margin-bottom: 14px;
+}
+.pf-menu {
+  display: grid;
+  gap: .6rem;
+  margin-top: 6px;
+}
+.pf-menu-btn {
+  background: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  padding: .6rem .75rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .12s ease, box-shadow .12s ease;
+}
+.pf-menu-btn:hover { border-color: #d4d4d4; box-shadow: 0 2px 5px rgba(0,0,0,.06); }
+
+/* RIGHT SIDE */
+.pf-right {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-tabs {
+  display: flex;
+  gap: 1.25rem;
+  padding: 14px 16px 0 16px;
+  border-bottom: 1px solid #e6e6e6;
+}
+.pf-tab {
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 10px 2px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #333;
+}
+.pf-tab.active {
+  color: #000;
+}
+.pf-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  background: #646cff; /* brand accent */
+  border-radius: 3px 3px 0 0;
+}
+
+.pf-content {
+  padding: 18px;
+  min-height: 360px;
+  display: grid;
+}
+.pf-content-placeholder {
+  background: white;
+  border: 1px dashed #cfcfcf;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: #666;
+}
