@@ -19,6 +19,7 @@ model User {
   passwordHash String
   createdAt    DateTime  @default(now())
   profile      Profile?
+  comments     Comment[]  
 }
 
 model Profile {
@@ -29,3 +30,18 @@ model Profile {
   avatarUrl   String  @default("")
   user        User    @relation(fields: [userId], references: [id])
 }
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  createdAt DateTime @default(now())
+
+  // the relationship to the user, which user comment belongs to 
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+}
+
+
+// npx prisma migrate dev - used this to get the local database changes 
+// npx prisma studio - run this in backend folder, GUI for database 
+
