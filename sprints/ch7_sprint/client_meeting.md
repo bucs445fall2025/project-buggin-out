@@ -19,7 +19,7 @@
 
 ## Requirement Flex Remaining
 
-3/3
+2/3
 
 ## Requirements Attempted in next Sprint
 
