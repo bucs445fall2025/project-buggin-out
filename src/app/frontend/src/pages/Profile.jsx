@@ -5,9 +5,39 @@ import "../styles/Profile.css";
 const TABS = ["Journey", "Saved Recipes", "Posts"];
 
 export default function Profile() {
+  const storage = window.sessionStorage;
   const [active, setActive] = useState(TABS[0]);
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [profileDescription, setProfileDescription] = useState("");
+  const [avatarPreview, setAvatarPreview] = useState(
+    () => storage.getItem("profile.avatarDataUrl") || ""
+  );
+
+  // Open the modal
+  const openModal = () => setIsModalOpen(true);
+
+  // Close the modal
+  const closeModal = () => setIsModalOpen(false);
+
+  // Handle profile description change
+  const handleDescriptionChange = (e) => {
+    setProfileDescription(e.target.value);
+  };
+
+  // Handle form submission
+  const handleSubmit = () => {
+    // Save the profile description and avatar (you can add API calls here)
+    localStorage.setItem("profile.bio", profileDescription);
+    localStorage.setItem("profile.avatarDataUrl", avatarPreview);
+
+    setBio(profileDescription);
+    setAvatar(avatarPreview);
+
+    // Close the modal after success
+    closeModal();
+  };
 
   useEffect(() => {
     setBio(
@@ -16,6 +46,14 @@ export default function Profile() {
     );
     setAvatar(localStorage.getItem("profile.avatarDataUrl") || "");
   }, []);
+
+  const onPickImage = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => setAvatarPreview(reader.result.toString());
+    reader.readAsDataURL(file);
+  };
 
   return (
     <div className="pf-container">
@@ -32,6 +70,9 @@ export default function Profile() {
           ) : (
             <div className="pf-avatar" aria-label="User avatar" />
           )}
+          <div className="pf-edit" onClick={openModal}>
+            Edit Profile
+          </div>
           <div className="pf-name">Johnny Chan</div>
           <div className="pf-bio">{bio}</div>
         </aside>
@@ -60,6 +101,50 @@ export default function Profile() {
           </section>
         </main>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="modal">
+          <div className="modal-content">
+            <h2>Edit Profile</h2>
+
+            {/* Profile Description */}
+            <textarea
+              className="pf-textarea"
+              value={profileDescription}
+              onChange={handleDescriptionChange}
+              placeholder="Edit your profile description"
+            />
+
+            {/* Profile Picture */}
+            <div>
+              <input
+                className="pf-file-input"
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  onPickImage(e);
+                }}
+              />
+              {avatarPreview && (
+                <img
+                  src={avatarPreview}
+                  alt="Avatar Preview"
+                  style={{ width: "100px", height: "100px", marginTop: "10px" }}
+                />
+              )}
+            </div>
+
+            {/* Submit Button */}
+            <button onClick={handleSubmit}>Submit</button>
+
+            {/* Close Modal */}
+            <button onClick={closeModal} style={{ marginLeft: "10px" }}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
