@@ -25,29 +25,9 @@ services:
       - /usr/src/app/node_modules
     ports:
       - "3001:3001"
-    command:
-      ["sh", "-c", "npm install -g nodemon && npm install && npm run dev"]
-    environment:
-      - DB_HOST=database
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=mydb
-      - DATABASE_URL=postgresql://postgres:postgres@database:5432/mydb?schema=public
-    depends_on:
-      - database
-
-  # PostgreSQL Database
-  database:
-    image: postgres:latest
-    container_name: database
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: mydb
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+    command: ["sh", "-c", "npm install && npx prisma migrate deploy && npm run dev"]
+    env_file:
+      - .env
 
 volumes:
   postgres_data:
