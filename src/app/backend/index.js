@@ -248,6 +248,42 @@ app.get("/api/recipes/:id/macros", async (req, res) => {
   }
 });
 
+// Get ingredients for a recipe by ID (used by Grocery page)
+app.get("/api/recipes/:id/ingredients", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data } = await spoon.get(`/recipes/${id}/information`, {
+      params: {
+        includeNutrition: false,
+      },
+    });
+
+    const ingredients =
+      data?.extendedIngredients?.map((ing) => ({
+        id: ing.id,
+        name: ing.originalName || ing.name,
+        amount: ing.amount,
+        unit: ing.unit,
+      })) || [];
+
+    res.json({
+      id,
+      title: data.title,
+      ingredients,
+    });
+  } catch (error) {
+    console.error(
+      "Ingredients route error:",
+      error.response?.data || error.message
+    );
+    res.status(error.response?.status || 500).json({
+      error: "Failed to fetch ingredients",
+      details: error.response?.data || error.message,
+    });
+  }
+});
+
+
 // ---------------------- Start server ----------------------
 app.listen(port, () => {
   console.log(`✅ Server is running at: http://localhost:${port}`);

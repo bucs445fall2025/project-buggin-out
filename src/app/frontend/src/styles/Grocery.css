@@ -67,7 +67,9 @@ body {
     margin-top: 14px;
     font-size: 14px;
     background: transparent;
+    color: #000;           
 }
+
 
 .clear-btn {
     position: absolute;
