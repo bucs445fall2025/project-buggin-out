@@ -5,7 +5,7 @@ export default function HomePage() {
   return (
     <div className="container">
       <div className="splash">
-        <h1>Welcome to Buggin Out!</h1>
+        <h1>Welcome to Forkcast!</h1>
         <p>Your go-to app for delicious recipes.</p>
         <p>
           Explore a variety of recipes from crunchy snacks to gourmet dishes.
