@@ -8,10 +8,10 @@ export default function RecipesPage() {
   const [recipes, setRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [savedRecipes, setSavedRecipes] = useState([]); // Track saved recipes
 
   // Function to map the detailed API recipe to the simpler card structure
   const mapRecipeToCard = (recipe) => {
-    // Accessing fields from your JSON structure
     const rawSummary =
       recipe.summary || "A delicious recipe with rich flavors.";
 
@@ -19,7 +19,6 @@ export default function RecipesPage() {
       id: recipe.id,
       title: recipe.title,
       image: recipe.image,
-      // Strip HTML tags and truncate the summary for the card description
       description: rawSummary.replace(/<[^>]+>/g, "").substring(0, 150) + "...",
       sourceUrl: recipe.sourceUrl,
     };
@@ -27,8 +26,6 @@ export default function RecipesPage() {
 
   useEffect(() => {
     const fetchRecipes = async () => {
-      // 1. Construct the target endpoint URL
-      // We'll proxy a request for 6 random recipes, including nutrition data
       const number = 6;
       const proxyEndpoint = `${API_BASE}/api/recipes/random?number=${number}&includeNutrition=true`;
 
@@ -36,18 +33,12 @@ export default function RecipesPage() {
         setIsLoading(true);
         setError(null);
 
-        // 2. Make the API call via the backend proxy
         const res = await fetch(proxyEndpoint);
-
-        // 3. Handle non-OK response (similar to teammate's file)
         const data = await res.json();
         if (!res.ok)
           throw new Error(data?.error || "Failed to fetch random recipes");
 
-        // The Spoonacular API wraps the recipes in a 'recipes' array
         const apiRecipes = data?.recipes || [];
-
-        // 4. Map the API results to the simplified card structure
         const mappedRecipes = apiRecipes.map(mapRecipeToCard);
 
         setRecipes(mappedRecipes);
@@ -60,7 +51,32 @@ export default function RecipesPage() {
     };
 
     fetchRecipes();
-  }, []); // Run only once on component mount
+  }, []);
+
+  // Function to handle saving a recipe
+  const handleSaveRecipe = async (recipe) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/recipes/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(recipe), // Send the recipe data to the backend
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.error || "Failed to save the recipe.");
+      }
+
+      // Update the saved recipes state
+      setSavedRecipes((prev) => [...prev, recipe.id]);
+      alert("Recipe saved successfully!");
+    } catch (err) {
+      console.error("Error saving recipe:", err);
+      alert(err.message || "Failed to save the recipe.");
+    }
+  };
 
   // Conditional Rendering
   if (isLoading) {
@@ -79,7 +95,6 @@ export default function RecipesPage() {
     );
   }
 
-  // Display No Recipes Found if the array is empty after loading
   if (recipes.length === 0) {
     return (
       <div className="rec-container">
@@ -102,15 +117,25 @@ export default function RecipesPage() {
             />
             <h3>{recipe.title}</h3>
             <p>{recipe.description}</p>
-            {/* Link the button to the sourceUrl from the API */}
-            <a
-              href={recipe.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="view-recipe-button"
-            >
-              View Recipe
-            </a>
+            <div className="recipe-actions">
+              {/* Link to view the recipe */}
+              <a
+                href={recipe.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="view-recipe-button"
+              >
+                View Recipe
+              </a>
+              {/* Add Recipe Button */}
+              <button
+                className="add-recipe-button"
+                onClick={() => handleSaveRecipe(recipe)}
+                disabled={savedRecipes.includes(recipe.id)} // Disable if already saved
+              >
+                {savedRecipes.includes(recipe.id) ? "Saved" : "Add Recipe"}
+              </button>
+            </div>
           </div>
         ))}
       </div>

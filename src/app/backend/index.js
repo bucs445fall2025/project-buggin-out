@@ -40,7 +40,7 @@ const port = process.env.PORT || 3001;
 // Apply CORS BEFORE routes
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "http://localhost:3002",
     credentials: true,
   })
 );
@@ -63,8 +63,6 @@ const spoon = axios.create({
 // Root test route
 app.get("/", async (req, res) => {
   try {
-    // Note: The root test route is not using the 'spoon' axios instance for demonstration,
-    // but the API key is correctly appended by the client in this case.
     const url = `https://api.spoonacular.com/recipes/complexSearch?query=pasta&apiKey=${SPOON_API_KEY}`;
     const response = await axios.get(url);
     res.json(response.data);
@@ -78,7 +76,7 @@ app.get("/", async (req, res) => {
   }
 });
 
-// === NEW: AUTH ROUTES =====================================================
+// === AUTH ROUTES =====================================================
 
 // POST /api/auth/signup {email, password, displayName?}
 app.post("/api/auth/signup", async (req, res) => {
@@ -131,7 +129,7 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-// === NEW: ME/PROFILE (protected) =========================================
+// === PROFILE ROUTES ==================================================
 
 // GET /api/me
 app.get("/api/me", requireAuth, async (req, res) => {
@@ -161,6 +159,8 @@ app.put("/api/profile", requireAuth, async (req, res) => {
   res.json(profile);
 });
 
+// === RECIPE ROUTES ===================================================
+
 // Search recipes (complexSearch + info + nutrition)
 app.get("/api/recipes/search", async (req, res) => {
   try {
@@ -183,30 +183,13 @@ app.get("/api/recipes/search", async (req, res) => {
   }
 });
 
-// ---------------------- NEW ROUTE: Get Random Recipes ----------------------
+// Get random recipes
 app.get("/api/recipes/random", async (req, res) => {
   try {
-    // Destructure query parameters with sensible defaults
-    const {
-      number = 6, // Default to 6 recipes for a nice display
-      includeNutrition = true,
-      "include-tags": includeTags,
-      "exclude-tags": excludeTags,
-    } = req.query;
-
-    // Use the 'spoon' instance, which automatically includes the API Key
+    const { number = 6, includeNutrition = true } = req.query;
     const { data } = await spoon.get("/recipes/random", {
-      params: {
-        number,
-        includeNutrition,
-        // Only include tags if they are provided, otherwise Spoonacular will ignore them
-        ...(includeTags && { "include-tags": includeTags }),
-        ...(excludeTags && { "exclude-tags": excludeTags }),
-      },
+      params: { number, includeNutrition },
     });
-
-    // The Spoonacular response for 'random' is an object containing a 'recipes' array,
-    // which is the format the frontend expects.
     res.json(data);
   } catch (error) {
     console.error(
@@ -219,7 +202,6 @@ app.get("/api/recipes/random", async (req, res) => {
     });
   }
 });
-// ----------------------------------------------------------------------------
 
 // Get macros for a recipe by ID
 app.get("/api/recipes/:id/macros", async (req, res) => {
@@ -248,14 +230,12 @@ app.get("/api/recipes/:id/macros", async (req, res) => {
   }
 });
 
-// Get ingredients for a recipe by ID (used by Grocery page)
+// Get ingredients for a recipe by ID
 app.get("/api/recipes/:id/ingredients", async (req, res) => {
   try {
     const { id } = req.params;
     const { data } = await spoon.get(`/recipes/${id}/information`, {
-      params: {
-        includeNutrition: false,
-      },
+      params: { includeNutrition: false },
     });
 
     const ingredients =
@@ -283,6 +263,50 @@ app.get("/api/recipes/:id/ingredients", async (req, res) => {
   }
 });
 
+// POST /api/recipes/save
+app.post("/api/recipes/save", requireAuth, async (req, res) => {
+  const { recipeId } = req.body;
+
+  if (!recipeId) {
+    return res.status(400).json({ error: "Recipe ID is required" });
+  }
+
+  try {
+    // Check if the recipe exists
+    const recipe = await prisma.recipe.findUnique({
+      where: { id: recipeId },
+    });
+
+    if (!recipe) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+
+    // Check if the recipe is already saved by the user
+    const existingSavedRecipe = await prisma.savedRecipe.findFirst({
+      where: {
+        userId: req.user.sub,
+        recipeId: recipeId,
+      },
+    });
+
+    if (existingSavedRecipe) {
+      return res.status(409).json({ error: "Recipe already saved" });
+    }
+
+    // Save the recipe for the user
+    const savedRecipe = await prisma.savedRecipe.create({
+      data: {
+        userId: req.user.sub,
+        recipeId: recipeId,
+      },
+    });
+
+    res.status(201).json(savedRecipe);
+  } catch (error) {
+    console.error("Error saving recipe:", error);
+    res.status(500).json({ error: "Failed to save recipe" });
+  }
+});
 
 // ---------------------- Start server ----------------------
 app.listen(port, () => {
