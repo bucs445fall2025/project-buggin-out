@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import "../styles/Home.css"; // Optional: Add styles for the Home page
+import "../styles/Home.css";
 
 export default function HomePage() {
   return (
@@ -8,11 +8,12 @@ export default function HomePage() {
         <h1>Welcome to Forkcast!</h1>
         <p>Your go-to app for delicious recipes.</p>
         <p>
-          Explore a variety of recipes from crunchy snacks to gourmet dishes.
+          Explore a variety of meals from crunchy snacks to gourmet dishes.
         </p>
-        <p>
-          Get started by browsing our <Link to="/recipes">Recipes</Link> page or
-          learn more <Link to="/about">About Us</Link>.
+        
+        <p style={{ marginTop: "2rem" }}>
+          <Link to="/recipes">Browse Recipes</Link>
+          <Link to="/about">About Us</Link>
         </p>
       </div>
     </div>

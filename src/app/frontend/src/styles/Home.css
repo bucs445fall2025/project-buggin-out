@@ -3,31 +3,69 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  min-height: 100vh;   
+  padding: 4rem 1rem;
   text-align: center;
   background-color: #f0f0f0;
-  width: 100vw;
-  position: relative; /* Required for pseudo-element positioning */
+  width: 100%;
+  position: relative;
   z-index: 1;
+  box-sizing: border-box; 
 }
+
 
 .container::before {
   content: "";
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   background-image: url(../assets/background.jpg);
   background-size: cover;
   background-position: center;
-  opacity: 0.5; /* Adjust transparency here */
-  z-index: -1; /* Place behind the content */
+  opacity: 0.35;
+  z-index: -1;
 }
 
 .splash {
-  background-color: rgb(163, 163, 162);
-  border-radius: 2rem;
-  width: 75%;
-  min-height: 35rem;
+  background: rgba(255, 255, 255, 0.65); 
+  backdrop-filter: blur(10px);
+  border-radius: 1.5rem;
+  padding: 3rem 2rem;
+  width: min(800px, 90%);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  animation: fadeIn 0.8s ease-in-out;
 }
+
+.splash h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.splash p {
+  font-size: 1.25rem;
+  margin: 0.7rem 0;
+  color: #444;
+}
+
+/* Modern buttons instead of plain text links */
+.splash a {
+  color: white;
+  background-color: #7fa3f0;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.7rem;
+  font-weight: bold;
+  text-decoration: none;
+  margin: 0 0.4rem;
+  transition: background 0.2s ease-in-out;
+}
+
+.splash a:hover {
+  background-color: #7fa3f0;
+}
+
+/* Simple fade-in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
