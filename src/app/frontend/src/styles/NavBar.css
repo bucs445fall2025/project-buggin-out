@@ -1,50 +1,71 @@
 .navbar {
-  background-color: #333;
-  padding-bottom: 1rem;
-  width: 100vw;
-  margin: auto;
-  position: absolute;
+  position: fixed;
   top: 0;
-  z-index: 1000;
+  width: 100%;
+  background: #1e1e1e;
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box; 
+  z-index: 500;
 }
 
-.navbar-links {
+/* our brand */
+.name {
+  font-size: 1.7rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.nav-center {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-center a {
+  color: #dddddd;
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: color 0.2s;
+  padding-left: 25px;
+  padding-right: 25px;
+  
+}
+
+.nav-center a:hover {
+  color: #ffffff;
+}
+
+.nav-right {
   list-style: none;
   display: flex;
   gap: 1rem;
 }
 
-.navbar-links a {
-  color: white;
+.btn {
   text-decoration: none;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.6rem;
+  font-weight: 500;
+  transition: background 0.25s;
 }
 
-.navbar-links a:hover {
-  text-decoration: underline;
+.signup {
+  background: #7fa3f0;
 }
 
-.right-links {
-  display: flex;
-  margin-left: auto;
-  margin-right: 20px;
-  text-decoration: none;
+.signup:hover {
+  background: #7fa3f0;
 }
 
-.navbar-signup {
-  margin-right: 20px;
-  text-decoration: none;
+.login {
+  background: #444;
 }
 
-.divider {
-  position: absolute; /* Position relative to the navbar */
-  top: 50%; /* Vertically center within the navbar */
-  left: 50%; /* Horizontally center within the navbar */
-  transform: translate(
-    -50%,
-    -50%
-  ); /* Adjust for the element's own dimensions */
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 40%;
+.login:hover {
+  background: #555;
 }
