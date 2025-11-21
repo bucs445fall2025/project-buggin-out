@@ -2,9 +2,9 @@
    BASE LAYOUT
    ==================================================================== */
 .rec-container {
-  padding: 2rem 1rem;
+  margin: auto;
+  margin-top: 6rem;
   max-width: 1200px; /* Limits max width for readability */
-  margin: 0 auto;
 }
 
 .rec-container h1 {

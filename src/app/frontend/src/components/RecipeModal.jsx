@@ -1,15 +1,24 @@
 import React from "react";
 import "../styles/RecipeModal.css";
 
-export default function RecipeModal({ isOpen, onClose, recipe }) {
+export default function RecipeModal({
+  isOpen,
+  onClose,
+  recipe,
+  onSaveRecipe,
+  savedRecipes = [],
+}) {
   if (!isOpen || !recipe) return null;
 
-  // Ingredients come pre-formatted from backend
   const ingredients = recipe.ingredients || [];
+  const isSaved = savedRecipes.includes(recipe.id);
 
   return (
-    <div className="modal-overlay">
-      <div className="recipe-modal-content">
+    <div className="modal-overlay" onClick={onClose}>
+      <div
+        className="recipe-modal-content"
+        onClick={(e) => e.stopPropagation()}
+      >
         <button className="modal-close" onClick={onClose}>
           X
         </button>
@@ -47,6 +56,14 @@ export default function RecipeModal({ isOpen, onClose, recipe }) {
             </a>
           </p>
         )}
+        {/* ADD RECIPE BUTTON */}
+        <button
+          className="add-recipe-btn"
+          onClick={() => onSaveRecipe(recipe)}
+          disabled={isSaved}
+        >
+          {isSaved ? "Saved" : "Add Recipe"}
+        </button>
       </div>
     </div>
   );

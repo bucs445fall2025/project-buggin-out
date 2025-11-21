@@ -263,6 +263,8 @@ export default function RecipesPage() {
         isOpen={isModalOpen}
         recipe={selectedRecipe}
         onClose={() => setIsModalOpen(false)}
+        onSaveRecipe={handleSaveRecipe}
+        savedRecipes={savedRecipes}
       />
     </div>
   );
