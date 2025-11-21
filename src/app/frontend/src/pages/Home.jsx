@@ -11,15 +11,7 @@ export default function HomePage() {
 
         <p style={{ marginTop: "2rem" }}>
           <Link to="/recipes">Browse Recipes</Link>
-          <Link to="/about">About Us</Link>
         </p>
-
-        {/* Clear Call-to-Action (CTA) section */}
-        <div className="cta-group">
-          <Link to="/recipes" className="cta-button primary">
-            Explore Recipes
-          </Link>
-        </div>
       </div>
     </div>
   );
