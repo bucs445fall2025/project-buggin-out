@@ -270,6 +270,48 @@ app.get("/api/recipes/:id/ingredients", async (req, res) => {
 
 // === THEMEALDB RECIPE ROUTES (Free Alternative) ======================
 
+// GET /api/recipes/themealdb/details/:id
+app.get("/api/recipes/themealdb/details/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { data } = await mealdb.get("/lookup.php", {
+      params: { i: id },
+    });
+
+    const meal = data.meals?.[0];
+    if (!meal) return res.status(404).json({ error: "Meal not found" });
+
+    // Format ingredients
+    const ingredients = Array.from({ length: 20 })
+      .map((_, i) => {
+        const ing = meal[`strIngredient${i + 1}`];
+        const measure = meal[`strMeasure${i + 1}`];
+        return ing && ing.trim()
+          ? { ingredient: ing, measure: measure?.trim() }
+          : null;
+      })
+      .filter(Boolean);
+
+    const formatted = {
+      id: meal.idMeal,
+      title: meal.strMeal,
+      category: meal.strCategory,
+      area: meal.strArea,
+      image: meal.strMealThumb,
+      instructions: meal.strInstructions,
+      tags: meal.strTags ? meal.strTags.split(",") : [],
+      youtube: meal.strYoutube,
+      ingredients,
+    };
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("Lookup error:", err);
+    res.status(500).json({ error: "Failed to fetch meal details" });
+  }
+});
+
 // GET /api/recipes/themealdb/categories
 // Gets the list of all categories for the filter dropdown
 app.get("/api/recipes/themealdb/categories", async (req, res) => {
