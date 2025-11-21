@@ -58,13 +58,16 @@ const spoon = axios.create({
   params: { apiKey: SPOON_API_KEY },
 });
 
+// ----------------------MealDB API setup (Free Alternative) ----------------------
+const MEALDB_API_KEY = "1";
+const mealdb = axios.create({
+  baseURL: `https://www.themealdb.com/api/json/v1/${MEALDB_API_KEY}`,
+});
 // ---------------------- Routes ----------------------
 
 // Root test route
 app.get("/", async (req, res) => {
   try {
-    // Note: The root test route is not using the 'spoon' axios instance for demonstration,
-    // but the API key is correctly appended by the client in this case.
     const url = `https://api.spoonacular.com/recipes/complexSearch?query=pasta&apiKey=${SPOON_API_KEY}`;
     const response = await axios.get(url);
     res.json(response.data);
@@ -78,7 +81,7 @@ app.get("/", async (req, res) => {
   }
 });
 
-// === NEW: AUTH ROUTES =====================================================
+// === AUTH ROUTES =====================================================
 
 // POST /api/auth/signup {email, password, displayName?}
 app.post("/api/auth/signup", async (req, res) => {
@@ -131,7 +134,7 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
-// === NEW: ME/PROFILE (protected) =========================================
+// === PROFILE ROUTES ==================================================
 
 // GET /api/me
 app.get("/api/me", requireAuth, async (req, res) => {
@@ -161,6 +164,8 @@ app.put("/api/profile", requireAuth, async (req, res) => {
   res.json(profile);
 });
 
+// === RECIPE ROUTES ===================================================
+
 // Search recipes (complexSearch + info + nutrition)
 app.get("/api/recipes/search", async (req, res) => {
   try {
@@ -183,30 +188,13 @@ app.get("/api/recipes/search", async (req, res) => {
   }
 });
 
-// ---------------------- NEW ROUTE: Get Random Recipes ----------------------
+// Get random recipes
 app.get("/api/recipes/random", async (req, res) => {
   try {
-    // Destructure query parameters with sensible defaults
-    const {
-      number = 6, // Default to 6 recipes for a nice display
-      includeNutrition = true,
-      "include-tags": includeTags,
-      "exclude-tags": excludeTags,
-    } = req.query;
-
-    // Use the 'spoon' instance, which automatically includes the API Key
+    const { number = 6, includeNutrition = true } = req.query;
     const { data } = await spoon.get("/recipes/random", {
-      params: {
-        number,
-        includeNutrition,
-        // Only include tags if they are provided, otherwise Spoonacular will ignore them
-        ...(includeTags && { "include-tags": includeTags }),
-        ...(excludeTags && { "exclude-tags": excludeTags }),
-      },
+      params: { number, includeNutrition },
     });
-
-    // The Spoonacular response for 'random' is an object containing a 'recipes' array,
-    // which is the format the frontend expects.
     res.json(data);
   } catch (error) {
     console.error(
@@ -219,7 +207,6 @@ app.get("/api/recipes/random", async (req, res) => {
     });
   }
 });
-// ----------------------------------------------------------------------------
 
 // Get macros for a recipe by ID
 app.get("/api/recipes/:id/macros", async (req, res) => {
@@ -248,14 +235,12 @@ app.get("/api/recipes/:id/macros", async (req, res) => {
   }
 });
 
-// Get ingredients for a recipe by ID (used by Grocery page)
+// Get ingredients for a recipe by ID
 app.get("/api/recipes/:id/ingredients", async (req, res) => {
   try {
     const { id } = req.params;
     const { data } = await spoon.get(`/recipes/${id}/information`, {
-      params: {
-        includeNutrition: false,
-      },
+      params: { includeNutrition: false },
     });
 
     const ingredients =
@@ -283,6 +268,190 @@ app.get("/api/recipes/:id/ingredients", async (req, res) => {
   }
 });
 
+// === THEMEALDB RECIPE ROUTES (Free Alternative) ======================
+
+// GET /api/recipes/themealdb/details/:id
+app.get("/api/recipes/themealdb/details/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const { data } = await mealdb.get("/lookup.php", {
+      params: { i: id },
+    });
+
+    const meal = data.meals?.[0];
+    if (!meal) return res.status(404).json({ error: "Meal not found" });
+
+    // Format ingredients
+    const ingredients = Array.from({ length: 20 })
+      .map((_, i) => {
+        const ing = meal[`strIngredient${i + 1}`];
+        const measure = meal[`strMeasure${i + 1}`];
+        return ing && ing.trim()
+          ? { ingredient: ing, measure: measure?.trim() }
+          : null;
+      })
+      .filter(Boolean);
+
+    const formatted = {
+      id: meal.idMeal,
+      title: meal.strMeal,
+      category: meal.strCategory,
+      area: meal.strArea,
+      image: meal.strMealThumb,
+      instructions: meal.strInstructions,
+      tags: meal.strTags ? meal.strTags.split(",") : [],
+      youtube: meal.strYoutube,
+      ingredients,
+    };
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("Lookup error:", err);
+    res.status(500).json({ error: "Failed to fetch meal details" });
+  }
+});
+
+// GET /api/recipes/themealdb/categories
+// Gets the list of all categories for the filter dropdown
+app.get("/api/recipes/themealdb/categories", async (req, res) => {
+  try {
+    const { data } = await mealdb.get("/categories.php");
+    res.json(data.categories || []);
+  } catch (error) {
+    console.error("TheMealDB Categories route error:", error);
+    res.status(500).json({ error: "Failed to fetch categories" });
+  }
+});
+
+// GET /api/recipes/themealdb/random_3
+// Workaround: Calls the single random endpoint 3 times to get 3 unique meals.
+app.get("/api/recipes/themealdb/random_3", async (req, res) => {
+  try {
+    const mealPromises = [];
+    // Make 3 concurrent calls to the single random meal endpoint
+    for (let i = 0; i < 6; i++) {
+      mealPromises.push(mealdb.get("/random.php"));
+    }
+
+    const responses = await Promise.all(mealPromises);
+
+    // Map the responses to extract the single meal object from each
+    const meals = responses
+      .map((response) => response.data?.meals?.[0])
+      .filter((meal) => meal);
+
+    // Map to a simplified card structure immediately
+    const mappedMeals = meals.map((meal) => ({
+      id: meal.idMeal,
+      title: meal.strMeal,
+      image: `${meal.strMealThumb}/preview`,
+      // Include category and area for a better random display description
+      description: `Category: ${meal.strCategory} | Area: ${meal.strArea}`,
+      sourceUrl: `/recipes/${meal.idMeal}`,
+    }));
+
+    res.json(mappedMeals);
+  } catch (error) {
+    console.error("TheMealDB Random 3 route error:", error);
+    res.status(500).json({
+      error: "Failed to fetch random meals from TheMealDB",
+    });
+  }
+});
+
+// GET /api/recipes/themealdb/search
+// Handles filtering by Category ('c'), Ingredient ('i'), or searching by Name ('s')
+app.get("/api/recipes/themealdb/search", async (req, res) => {
+  try {
+    // filterType can be 'c' (category), 'i' (ingredient), or 's' (name)
+    const { query, filterType } = req.query;
+
+    if (!query || !filterType) {
+      return res
+        .status(400)
+        .json({ error: "Query and filterType are required." });
+    }
+
+    let endpoint = "/filter.php";
+    let params = {};
+
+    if (filterType === "c") {
+      params = { c: query };
+    } else if (filterType === "i") {
+      params = { i: query };
+    } else if (filterType === "s") {
+      // Search by full name (uses a different endpoint)
+      endpoint = "/search.php";
+      params = { s: query };
+    } else {
+      return res.status(400).json({ error: "Invalid filterType specified." });
+    }
+
+    const { data } = await mealdb.get(endpoint, { params });
+
+    // Map the basic meal results to a consistent card structure
+    const mappedMeals = (data.meals || []).map((meal) => ({
+      id: meal.idMeal,
+      title: meal.strMeal,
+      image: `${meal.strMealThumb}/preview`,
+      description: "Filtered result. Click to view details.",
+      sourceUrl: `/recipes/${meal.idMeal}`,
+    }));
+
+    res.json(mappedMeals);
+  } catch (error) {
+    console.error("TheMealDB Search route error:", error);
+    res.status(500).json({
+      error: "Failed to fetch search results from TheMealDB",
+    });
+  }
+});
+
+// POST /api/recipes/save
+app.post("/api/recipes/save", requireAuth, async (req, res) => {
+  const { recipeId } = req.body;
+
+  if (!recipeId) {
+    return res.status(400).json({ error: "Recipe ID is required" });
+  }
+
+  try {
+    // Check if the recipe exists
+    const recipe = await prisma.recipe.findUnique({
+      where: { id: recipeId },
+    });
+
+    if (!recipe) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+
+    // Check if the recipe is already saved by the user
+    const existingSavedRecipe = await prisma.savedRecipe.findFirst({
+      where: {
+        userId: req.user.sub,
+        recipeId: recipeId,
+      },
+    });
+
+    if (existingSavedRecipe) {
+      return res.status(409).json({ error: "Recipe already saved" });
+    }
+
+    // Save the recipe for the user
+    const savedRecipe = await prisma.savedRecipe.create({
+      data: {
+        userId: req.user.sub,
+        recipeId: recipeId,
+      },
+    });
+
+    res.status(201).json(savedRecipe);
+  } catch (error) {
+    console.error("Error saving recipe:", error);
+    res.status(500).json({ error: "Failed to save recipe" });
+  }
+});
 
 // ---------------------- Start server ----------------------
 app.listen(port, () => {

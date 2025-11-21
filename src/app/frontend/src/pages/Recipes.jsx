@@ -1,119 +1,269 @@
 import React, { useState, useEffect } from "react";
 import "../styles/Recipes.css";
+import RecipeModal from "../components/RecipeModal.jsx";
 
-// Use the same base URL as your teammate
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3001";
 
 export default function RecipesPage() {
   const [recipes, setRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [savedRecipes, setSavedRecipes] = useState([]);
 
-  // Function to map the detailed API recipe to the simpler card structure
-  const mapRecipeToCard = (recipe) => {
-    // Accessing fields from your JSON structure
-    const rawSummary =
-      recipe.summary || "A delicious recipe with rich flavors.";
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState("i");
+  const [categories, setCategories] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [isRandomView, setIsRandomView] = useState(true);
 
-    return {
-      id: recipe.id,
-      title: recipe.title,
-      image: recipe.image,
-      // Strip HTML tags and truncate the summary for the card description
-      description: rawSummary.replace(/<[^>]+>/g, "").substring(0, 150) + "...",
-      sourceUrl: recipe.sourceUrl,
-    };
-  };
+  const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const fetchRecipes = async () => {
-      // 1. Construct the target endpoint URL
-      // We'll proxy a request for 6 random recipes, including nutrition data
-      const number = 6;
-      const proxyEndpoint = `${API_BASE}/api/recipes/random?number=${number}&includeNutrition=true`;
+    const fetchInitialData = async () => {
+      setIsLoading(true);
+      setError(null);
 
       try {
-        setIsLoading(true);
-        setError(null);
+        const catRes = await fetch(
+          `${API_BASE}/api/recipes/themealdb/categories`
+        );
+        let categoryNames = [];
 
-        // 2. Make the API call via the backend proxy
-        const res = await fetch(proxyEndpoint);
+        if (catRes.ok) {
+          const catData = await catRes.json();
+          categoryNames = catData.map((c) => c.strCategory).sort();
+          setCategories(categoryNames);
+        }
 
-        // 3. Handle non-OK response (similar to teammate's file)
+        const randomEndpoint = `${API_BASE}/api/recipes/themealdb/random_3`;
+        const res = await fetch(randomEndpoint);
         const data = await res.json();
+
         if (!res.ok)
           throw new Error(data?.error || "Failed to fetch random recipes");
 
-        // The Spoonacular API wraps the recipes in a 'recipes' array
-        const apiRecipes = data?.recipes || [];
-
-        // 4. Map the API results to the simplified card structure
-        const mappedRecipes = apiRecipes.map(mapRecipeToCard);
-
-        setRecipes(mappedRecipes);
+        setRecipes(data);
+        setIsRandomView(true);
       } catch (err) {
         console.error("Error fetching recipes:", err);
-        setError(err.message || "Failed to load recipes.");
+        setError(err.message || "Failed to load random recipes or categories.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchRecipes();
-  }, []); // Run only once on component mount
+    fetchInitialData();
+  }, []);
 
-  // Conditional Rendering
+  const openRecipeModal = async (mealId) => {
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/recipes/themealdb/details/${mealId}`
+      );
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error);
+
+      setSelectedRecipe(data);
+      setIsModalOpen(true);
+    } catch (err) {
+      console.error("Error loading details", err);
+      alert("Failed to load recipe details.");
+    }
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+
+    if (!searchTerm) return;
+
+    setIsSearching(true);
+    setError(null);
+    setRecipes([]);
+
+    try {
+      const searchEndpoint = `${API_BASE}/api/recipes/themealdb/search?query=${searchTerm}&filterType=${filterType}`;
+      const res = await fetch(searchEndpoint);
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data?.error || "Search failed.");
+
+      setRecipes(data);
+      setIsRandomView(false);
+    } catch (err) {
+      console.error("Error searching recipes:", err);
+      setError(
+        err.message ||
+          "Failed to perform search. Try using an underscore for ingredients (e.g., 'chicken_breast')."
+      );
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleSaveRecipe = async (recipe) => {
+    const payload = { recipeId: recipe.id };
+
+    try {
+      const res = await fetch(`${API_BASE}/api/recipes/save`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.error || "Failed to save the recipe.");
+      }
+
+      setSavedRecipes((prev) => [...prev, recipe.id]);
+      alert("Recipe saved successfully!");
+    } catch (err) {
+      console.error("Error saving recipe:", err);
+      alert(
+        err.message ||
+          "Failed to save the recipe. (Auth Token required to save)"
+      );
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="rec-container">
-        <div className="recipes-container">Loading random recipes... ⏳</div>
+        <div className="recipes-container">
+          Loading your initial random recipes... 🍽️
+        </div>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="rec-container">
-        <div className="recipes-container error-message">Error: {error}</div>
-      </div>
-    );
-  }
-
-  // Display No Recipes Found if the array is empty after loading
-  if (recipes.length === 0) {
-    return (
-      <div className="rec-container">
-        <div className="recipes-container">No random recipes found.</div>
-      </div>
-    );
-  }
-
-  // Render Recipes
   return (
     <div className="rec-container">
       <h1>Recipes</h1>
-      <div className="recipes-container">
-        {recipes.map((recipe) => (
-          <div key={recipe.id} className="recipe-card">
-            <img
-              src={recipe.image}
-              alt={recipe.title}
-              className="recipe-image"
-            />
-            <h3>{recipe.title}</h3>
-            <p>{recipe.description}</p>
-            {/* Link the button to the sourceUrl from the API */}
-            <a
-              href={recipe.sourceUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="view-recipe-button"
+
+      <div className="filter-ui-card">
+        <h2>Find Your Next Meal</h2>
+        <form onSubmit={handleSearch} className="search-form">
+          <div className="input-group">
+            <select
+              value={filterType}
+              onChange={(e) => {
+                const newFilterType = e.target.value;
+                setFilterType(newFilterType);
+
+                if (newFilterType === "c" && categories.length > 0) {
+                  setSearchTerm(categories[0]);
+                } else {
+                  setSearchTerm("");
+                }
+              }}
             >
-              View Recipe
-            </a>
+              <option value="i">Filter by Ingredient</option>
+              <option value="c">Filter by Category</option>
+              <option value="s">Search by Name</option>
+            </select>
+
+            {filterType === "c" ? (
+              <select
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                required
+              >
+                {categories.length === 0 && (
+                  <option value="" disabled>
+                    Loading Categories...
+                  </option>
+                )}
+
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                type="text"
+                placeholder={`Enter ${
+                  filterType === "i"
+                    ? "ingredient (e.g., chicken breast)"
+                    : "recipe name"
+                }`}
+                value={searchTerm}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchTerm(
+                    filterType === "i" ? value.replace(/\s+/g, "_") : value
+                  );
+                }}
+                required
+              />
+            )}
           </div>
-        ))}
+
+          <button type="submit" disabled={isSearching || !searchTerm}>
+            {isSearching ? "Searching..." : "Search Recipes"}
+          </button>
+        </form>
+        {isSearching && (
+          <p className="loading-message">Searching for recipes...</p>
+        )}
       </div>
+
+      <hr />
+
+      <h2>
+        {isRandomView
+          ? "Today's Random Picks 🎲"
+          : `Search Results for "${searchTerm}" (${recipes.length} found)`}
+      </h2>
+
+      {error && <div className="error-message">Error: {error}</div>}
+
+      {recipes.length === 0 && !isSearching ? (
+        <div className="no-results">
+          No recipes found. Try a different search term or category.
+        </div>
+      ) : (
+        <div className="recipes-container">
+          {recipes.map((recipe) => (
+            <div key={recipe.id} className="recipe-card">
+              <img
+                src={recipe.image}
+                alt={recipe.title}
+                className="recipe-image"
+              />
+              <h3>{recipe.title}</h3>
+              <p className="mealdb-description">{recipe.description}</p>
+              <div className="recipe-actions">
+                <button
+                  className="view-recipe-button"
+                  onClick={() => openRecipeModal(recipe.id)}
+                >
+                  View Details
+                </button>
+
+                <button
+                  className="add-recipe-button"
+                  onClick={() => handleSaveRecipe(recipe)}
+                  disabled={savedRecipes.includes(recipe.id)}
+                >
+                  {savedRecipes.includes(recipe.id) ? "Saved" : "Add Recipe"}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <RecipeModal
+        isOpen={isModalOpen}
+        recipe={selectedRecipe}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }
