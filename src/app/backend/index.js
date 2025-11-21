@@ -40,7 +40,7 @@ const port = process.env.PORT || 3001;
 // Apply CORS BEFORE routes
 app.use(
   cors({
-    origin: "http://localhost:3002",
+    origin: "http://localhost:3000",
     credentials: true,
   })
 );
@@ -58,6 +58,11 @@ const spoon = axios.create({
   params: { apiKey: SPOON_API_KEY },
 });
 
+// ----------------------MealDB API setup (Free Alternative) ----------------------
+const MEALDB_API_KEY = "1";
+const mealdb = axios.create({
+  baseURL: `https://www.themealdb.com/api/json/v1/${MEALDB_API_KEY}`,
+});
 // ---------------------- Routes ----------------------
 
 // Root test route
@@ -259,6 +264,104 @@ app.get("/api/recipes/:id/ingredients", async (req, res) => {
     res.status(error.response?.status || 500).json({
       error: "Failed to fetch ingredients",
       details: error.response?.data || error.message,
+    });
+  }
+});
+
+// === THEMEALDB RECIPE ROUTES (Free Alternative) ======================
+
+// GET /api/recipes/themealdb/categories
+// Gets the list of all categories for the filter dropdown
+app.get("/api/recipes/themealdb/categories", async (req, res) => {
+  try {
+    const { data } = await mealdb.get("/categories.php");
+    res.json(data.categories || []);
+  } catch (error) {
+    console.error("TheMealDB Categories route error:", error);
+    res.status(500).json({ error: "Failed to fetch categories" });
+  }
+});
+
+// GET /api/recipes/themealdb/random_3
+// Workaround: Calls the single random endpoint 3 times to get 3 unique meals.
+app.get("/api/recipes/themealdb/random_3", async (req, res) => {
+  try {
+    const mealPromises = [];
+    // Make 3 concurrent calls to the single random meal endpoint
+    for (let i = 0; i < 6; i++) {
+      mealPromises.push(mealdb.get("/random.php"));
+    }
+
+    const responses = await Promise.all(mealPromises);
+
+    // Map the responses to extract the single meal object from each
+    const meals = responses
+      .map((response) => response.data?.meals?.[0])
+      .filter((meal) => meal);
+
+    // Map to a simplified card structure immediately
+    const mappedMeals = meals.map((meal) => ({
+      id: meal.idMeal,
+      title: meal.strMeal,
+      image: `${meal.strMealThumb}/preview`,
+      // Include category and area for a better random display description
+      description: `Category: ${meal.strCategory} | Area: ${meal.strArea}`,
+      sourceUrl: `/recipes/${meal.idMeal}`,
+    }));
+
+    res.json(mappedMeals);
+  } catch (error) {
+    console.error("TheMealDB Random 3 route error:", error);
+    res.status(500).json({
+      error: "Failed to fetch random meals from TheMealDB",
+    });
+  }
+});
+
+// GET /api/recipes/themealdb/search
+// Handles filtering by Category ('c'), Ingredient ('i'), or searching by Name ('s')
+app.get("/api/recipes/themealdb/search", async (req, res) => {
+  try {
+    // filterType can be 'c' (category), 'i' (ingredient), or 's' (name)
+    const { query, filterType } = req.query;
+
+    if (!query || !filterType) {
+      return res
+        .status(400)
+        .json({ error: "Query and filterType are required." });
+    }
+
+    let endpoint = "/filter.php";
+    let params = {};
+
+    if (filterType === "c") {
+      params = { c: query };
+    } else if (filterType === "i") {
+      params = { i: query };
+    } else if (filterType === "s") {
+      // Search by full name (uses a different endpoint)
+      endpoint = "/search.php";
+      params = { s: query };
+    } else {
+      return res.status(400).json({ error: "Invalid filterType specified." });
+    }
+
+    const { data } = await mealdb.get(endpoint, { params });
+
+    // Map the basic meal results to a consistent card structure
+    const mappedMeals = (data.meals || []).map((meal) => ({
+      id: meal.idMeal,
+      title: meal.strMeal,
+      image: `${meal.strMealThumb}/preview`,
+      description: "Filtered result. Click to view details.",
+      sourceUrl: `/recipes/${meal.idMeal}`,
+    }));
+
+    res.json(mappedMeals);
+  } catch (error) {
+    console.error("TheMealDB Search route error:", error);
+    res.status(500).json({
+      error: "Failed to fetch search results from TheMealDB",
     });
   }
 });

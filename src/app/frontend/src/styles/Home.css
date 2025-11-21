@@ -1,16 +1,15 @@
+/* --- Base Container & Background --- */
+
 .container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  /* Removed: flex-direction: column; justify-content: center; */
+  /* We want the hero-splash to be the main focus, centering its content */
   height: 100vh;
-  text-align: center;
-  background-color: #f0f0f0;
   width: 100vw;
-  position: relative; /* Required for pseudo-element positioning */
-  z-index: 1;
+  position: relative;
+  /* Removed: background-color: #f0f0f0; */
 }
 
+/* Background Image Enhancement (More subtle and darker for contrast) */
 .container::before {
   content: "";
   position: absolute;
@@ -21,13 +20,103 @@
   background-image: url(../assets/background.jpg);
   background-size: cover;
   background-position: center;
-  opacity: 0.5; /* Adjust transparency here */
-  z-index: -1; /* Place behind the content */
+  /* Reduced opacity for a darker, moodier look, improving text contrast */
+  opacity: 0.2;
+  z-index: -1;
+  /* Added a dark overlay for better text readability */
+  background-color: #000000;
 }
 
-.splash {
-  background-color: rgb(163, 163, 162);
-  border-radius: 2rem;
-  width: 75%;
-  min-height: 35rem;
+/* --- Hero Splash Content Box --- */
+
+.hero-splash {
+  /* Center the content box vertically and horizontally */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+
+  /* Modern box styling */
+  background-color: rgba(
+    255,
+    255,
+    255,
+    0.95
+  ); /* Nearly opaque white/light gray */
+  border-radius: 1rem;
+  padding: 4rem 3rem; /* Generous padding */
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); /* Subtle depth */
+
+  /* Positioning and size */
+  width: 90%; /* Better responsiveness */
+  max-width: 700px; /* Max width for readability */
+  position: absolute; /* Position relative to container */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Centering trick */
+}
+
+/* --- Typography --- */
+
+.main-title {
+  font-size: 3.5rem; /* Large, impactful title */
+  margin-bottom: 0.5rem;
+  color: #333; /* Dark color for contrast */
+}
+
+.tagline {
+  font-size: 1.5rem; /* Prominent and informative */
+  font-weight: 300;
+  color: #555;
+  margin-top: 0;
+  margin-bottom: 2rem;
+}
+
+.description {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 3rem;
+  max-width: 500px;
+}
+
+/* --- Call-to-Action (CTA) Buttons --- */
+
+.cta-group {
+  display: flex;
+  gap: 1.5rem; /* Space between buttons */
+}
+
+.cta-button {
+  text-decoration: none; /* Remove underline */
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+  font-size: 1.1rem;
+}
+
+/* Primary CTA (Vibrant Brand Color - e.g., a warm orange/red for food) */
+.cta-button.primary {
+  background-color: #ff6b6b; /* Use your main brand color here */
+  color: white;
+  border: 2px solid #ff6b6b;
+}
+
+.cta-button.primary:hover {
+  background-color: #ff8e8e;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(255, 107, 107, 0.4);
+}
+
+/* Secondary CTA (Subtle, professional border style) */
+.cta-button.secondary {
+  background-color: transparent;
+  color: #ff6b6b;
+  border: 2px solid #ff6b6b;
+}
+
+.cta-button.secondary:hover {
+  background-color: #fcebeb; /* Very light background on hover */
+  transform: translateY(-2px);
 }
