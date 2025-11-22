@@ -13,7 +13,6 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  // ✅ Use login(), not setIsLoggedIn
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -43,7 +42,7 @@ export default function SignUp() {
 
       if (!res.ok) throw new Error(data?.error || "Registration failed");
 
-      // ✅ Use login() from context—this sets token + state
+      // sets token + state
       login(data.token);
 
       navigate("/profile");

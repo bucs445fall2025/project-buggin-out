@@ -18,14 +18,12 @@ function NavBar() {
           Forkcast
         </Link>
       </div>
-
       <ul className="nav-center">
         <li><Link to="/recipes">Recipes</Link></li>
         <li><Link to="/grocery">Grocery</Link></li>
         <li><Link to="/macro">Macro Tracker</Link></li>
         <li><Link to="/profile">Profile</Link></li>
       </ul>
-
       <ul className="nav-right">
         {!isLoggedIn ? (
           <>

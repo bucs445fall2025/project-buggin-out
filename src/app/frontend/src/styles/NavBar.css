@@ -21,6 +21,10 @@
   text-decoration: none;
 }
 
+/* ====================================================================
+   RECIPES, GROCERY, MACRO TRACKER, PROFILE SECTION
+   ==================================================================== */
+   
 .nav-center {
   list-style: none;
   display: flex;
@@ -40,6 +44,10 @@
 .nav-center a:hover {
   color: #ffffff;
 }
+
+/* ====================================================================
+   RIGHT SECTION FOR SIGN UP, LOGIN, AND SIGNOUT
+   ==================================================================== */
 
 .nav-right {
   list-style: none;

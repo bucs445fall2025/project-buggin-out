@@ -1,3 +1,4 @@
+/* added this to ensure consistent spacing and no overlap with pages*/
 * {
   box-sizing: border-box;
 }
@@ -12,6 +13,10 @@
   overflow-y: hidden;
 
 }
+
+/* ====================================================================
+   SIGN UP FORM DETAILS
+   ==================================================================== */
 
 .signup-form {
   background: rgba(255, 255, 255, 0.65);
