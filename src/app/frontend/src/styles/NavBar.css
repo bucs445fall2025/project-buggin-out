@@ -1,4 +1,6 @@
 .navbar {
+  height: 70px; 
+  line-height: 70px;
   position: fixed;
   top: 0;
   width: 100%;
@@ -63,9 +65,17 @@
 }
 
 .login {
-  background: #444;
+  background: rgb(199, 195, 195);
 }
 
 .login:hover {
+  background: #555;
+}
+
+.signout {
+  background: rgb(199, 195, 195);
+}
+
+.signout:hover {
   background: #555;
 }

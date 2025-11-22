@@ -1,51 +1,77 @@
+* {
+  box-sizing: border-box;
+}
+
 .signup-container {
   display: flex;
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #f3f4f6;
+  background: #f0f0f0;
+  padding: 2rem;
+  overflow-y: hidden;
+
 }
 
 .signup-form {
-    display: flex;           
-    flex-direction: column;  
-    align-items: center;     
-    justify-content: center; 
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 14px;
-    width: min(700px, 90vw);
-    padding: 24px;
-    box-shadow: 0 4px 6px rgba(0,0,0,.08);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  padding: 3rem 2rem;
+  border-radius: 1.5rem;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.8s ease-in-out;
+  overflow-y: hidden;
 }
 
 .form-title {
-    text-align: center;
-    font-size: 40px;
-    padding-bottom: 10px;  
+  text-align: center;
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 1rem;
 }
 
-.form-group {
-    display: flex;
-    align-items: left;
-    justify-content: center;
-    margin-bottom: 25px;
+.signup-form input {
+  padding: 0.7rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid #ccc;
+  outline: none;
+  font-size: 1rem;
+  background-color: rgba(255, 255, 255, 0.85);
+  transition: border 0.2s;
 }
 
-.register-button {
-    display: flex;
-    background-color: #7fa3f0;
-    justify-content: center;
-    align-items: center;
-    color: white;
-    border-radius: 30px;
-    padding: 10px 39px;
-    width: auto;
-    cursor: pointer;
+.signup-form input:focus {
+  border-color: #888;
 }
 
-input {
-    text-align: center;
-    border-radius: 4px;
+.signup-form button {
+  padding: 0.7rem 1rem;
+  background-color: #555;
+  color: white;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.6rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
 
+.signup-form button:hover {
+  background-color: #777;
+}
+
+.form-message {
+  color: #333;
+  font-size: 0.95rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }

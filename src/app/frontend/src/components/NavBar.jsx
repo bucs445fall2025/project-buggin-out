@@ -1,7 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../styles/NavBar.css";
+import { useAuth } from "./AuthContext";
 
 function NavBar() {
+  const { isLoggedIn, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
+
   return (
     <nav className="navbar">
       <div className="nav-left">
@@ -18,8 +27,14 @@ function NavBar() {
       </ul>
 
       <ul className="nav-right">
-        <li><Link to="/signup" className="btn signup">Sign Up</Link></li>
-        <li><Link to="/login" className="btn login">Login</Link></li>
+        {!isLoggedIn ? (
+          <>
+            <li><Link to="/signup" className="btn signup">Sign Up</Link></li>
+            <li><Link to="/login" className="btn login">Login</Link></li>
+          </>
+        ) : (
+          <li><button onClick={handleLogout} className="btn signout">Sign Out</button></li>
+        )}
       </ul>
     </nav>
   );
