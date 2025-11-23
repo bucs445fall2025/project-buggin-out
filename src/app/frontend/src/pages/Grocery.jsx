@@ -2,69 +2,73 @@ import React, { useEffect, useState } from "react";
 import "../styles/Grocery.css";
 
 const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
-const SAVED_KEY = "saved-recipes";
 
 export default function Grocery() {
   const [query, setQuery] = useState("");
   const [savedRecipes, setSavedRecipes] = useState([]);
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [ingredients, setIngredients] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState("");
+  const [checkedIngredients, setCheckedIngredients] = useState({});
 
-  // load the SAME saved recipes MacroTracker uses
+  // Load saved recipes from backend
   useEffect(() => {
-    const raw = localStorage.getItem(SAVED_KEY);
-    if (raw) {
+    const load = async () => {
       try {
-        const parsed = JSON.parse(raw);
-        setSavedRecipes(Array.isArray(parsed) ? parsed : []);
-      } catch {
-        setSavedRecipes([]);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setMsg("You must be logged in to view your grocery list.");
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch(`${API_BASE}/api/recipes/saved`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to load saved");
+
+        setSavedRecipes(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setMsg(err.message);
+      } finally {
+        setLoading(false);
       }
-    } else {
-      // fallback just so UI isn't empty
-      setSavedRecipes([]);
-    }
+    };
+
+    load();
   }, []);
 
   const filtered = savedRecipes.filter((r) =>
-    (r.title || "")
-      .toLowerCase()
-      .includes(query.trim().toLowerCase())
+    (r.title || "").toLowerCase().includes(query.trim().toLowerCase())
   );
 
-  const handleSelect = async (recipe) => {
+  const handleSelect = (recipe) => {
     setSelectedRecipe(recipe);
-    setIngredients([]);
     setMsg("");
+    // Reset checked state when selecting a new recipe
+    const initialChecked = {};
+    recipe.ingredients?.forEach((ing, i) => {
+      initialChecked[i] = false;
+    });
+    setCheckedIngredients(initialChecked);
+  };
 
-    if (!recipe?.id) {
-      setMsg("This saved recipe has no Spoonacular ID.");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const res = await fetch(
-        `${API_BASE}/api/recipes/${recipe.id}/ingredients`
-      );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Failed to fetch ingredients");
-      setIngredients(data.ingredients || []);
-    } catch (err) {
-      setMsg(err.message);
-    } finally {
-      setLoading(false);
-    }
+  const toggleIngredient = (index) => {
+    setCheckedIngredients((prev) => ({
+      ...prev,
+      [index]: !prev[index],
+    }));
   };
 
   return (
     <div className="grocery-container">
       <div className="grocery-card">
-        <h2 className="grocery-title">Browse ingredients for your saved recipes</h2>
+        <h2 className="grocery-title">Your Grocery List (Saved Recipes)</h2>
+
         <div className="grocery-content">
-          {/* LEFT SIDE: search + list */}
+          {/* LEFT PANEL */}
           <div className="left-panel">
             <div className="input-wrapper">
               <input
@@ -81,29 +85,37 @@ export default function Grocery() {
             </div>
 
             <div className="recipe-list">
-              {filtered.length === 0 ? (
+              {loading && <p>Loading saved recipes…</p>}
+
+              {!loading && msg && (
+                <p style={{ fontSize: "0.8rem", color: "red" }}>{msg}</p>
+              )}
+
+              {!loading && filtered.length === 0 && !msg && (
                 <p style={{ fontSize: "0.8rem", color: "#555" }}>
-                  No saved recipes found. Save some in Macro Tracker first.
+                  No saved recipes found.
                 </p>
-              ) : (
+              )}
+
+              {!loading &&
+                filtered.length > 0 &&
                 filtered.map((r) => (
                   <div
-                    key={r.id}
+                    key={r.recipeId}
                     onClick={() => handleSelect(r)}
                     className={`recipe-item ${
-                      selectedRecipe && selectedRecipe.id === r.id
+                      selectedRecipe && selectedRecipe.recipeId === r.recipeId
                         ? "selected"
                         : ""
                     }`}
                   >
                     {r.title}
                   </div>
-                ))
-              )}
+                ))}
             </div>
           </div>
 
-          {/* RIGHT SIDE: ingredients */}
+          {/* RIGHT PANEL */}
           <div className="ingredients-panel">
             <h2>
               {selectedRecipe
@@ -111,32 +123,39 @@ export default function Grocery() {
                 : "Ingredients"}
             </h2>
 
-            {loading && <p>Loading ingredients…</p>}
-
-            {!loading && msg && <p style={{ color: "red" }}>{msg}</p>}
-
-            {!loading &&
-              !msg &&
-              selectedRecipe &&
-              ingredients.length === 0 && (
-                <p>No ingredients returned for this recipe.</p>
-              )}
-
-            {!loading && ingredients.length > 0 && (
-              <ul>
-                {ingredients.map((ing) => (
-                  <li key={ing.id || ing.name}>
-                    {ing.name}
-                    {ing.amount
-                      ? ` — ${ing.amount} ${ing.unit || ""}`.trim()
-                      : ""}
-                  </li>
-                ))}
-              </ul>
-            )}
-
             {!selectedRecipe && !loading && !msg && (
               <p>Select a recipe to view ingredients</p>
+            )}
+
+            {selectedRecipe && (
+              <>
+                {selectedRecipe.ingredients?.length === 0 && (
+                  <p>No ingredients found for this recipe.</p>
+                )}
+
+                {selectedRecipe.ingredients?.length > 0 && (
+                  <ul>
+                    {selectedRecipe.ingredients.map((ing, i) => (
+                      <li key={i}>
+                        <label>
+                          <input
+                            type="checkbox"
+                            checked={checkedIngredients[i] || false}
+                            onChange={() => toggleIngredient(i)}
+                          />{" "}
+                          {ing.name
+                            ? `${ing.name}${
+                                ing.measure ? ` — ${ing.measure}` : ""
+                              }`
+                            : `${ing.ingredient}${
+                                ing.measure ? ` — ${ing.measure}` : ""
+                              }`}
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </>
             )}
           </div>
         </div>

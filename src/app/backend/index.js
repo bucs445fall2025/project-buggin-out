@@ -408,48 +408,101 @@ app.get("/api/recipes/themealdb/search", async (req, res) => {
   }
 });
 
-// POST /api/recipes/save
+// === SAVED RECIPES ROUTE ============================================
 app.post("/api/recipes/save", requireAuth, async (req, res) => {
   const { recipeId } = req.body;
+  console.log("Incoming recipeId:", recipeId, typeof recipeId);
+  console.log("User:", req.user);
 
   if (!recipeId) {
     return res.status(400).json({ error: "Recipe ID is required" });
   }
 
   try {
-    // Check if the recipe exists
-    const recipe = await prisma.recipe.findUnique({
-      where: { id: recipeId },
-    });
-
-    if (!recipe) {
-      return res.status(404).json({ error: "Recipe not found" });
-    }
-
-    // Check if the recipe is already saved by the user
-    const existingSavedRecipe = await prisma.savedRecipe.findFirst({
+    // Prevent duplicates
+    const existing = await prisma.savedRecipe.findFirst({
       where: {
         userId: req.user.sub,
-        recipeId: recipeId,
+        recipeId,
       },
     });
 
-    if (existingSavedRecipe) {
+    if (existing) {
       return res.status(409).json({ error: "Recipe already saved" });
     }
 
-    // Save the recipe for the user
-    const savedRecipe = await prisma.savedRecipe.create({
+    const saved = await prisma.savedRecipe.create({
       data: {
         userId: req.user.sub,
-        recipeId: recipeId,
+        recipeId,
       },
     });
 
-    res.status(201).json(savedRecipe);
-  } catch (error) {
-    console.error("Error saving recipe:", error);
+    res.status(201).json(saved);
+  } catch (err) {
+    console.error("Save error:", err);
     res.status(500).json({ error: "Failed to save recipe" });
+  }
+});
+
+//GET saved recipes for user
+// GET /api/recipes/saved
+// GET /api/recipes/saved
+// Returns FULL recipe data: title + ingredients
+// GET /api/recipes/saved
+app.get("/api/recipes/saved", requireAuth, async (req, res) => {
+  try {
+    const saved = await prisma.savedRecipe.findMany({
+      where: { userId: req.user.sub },
+      select: { recipeId: true },
+    });
+
+    if (saved.length === 0) return res.json([]);
+
+    const results = [];
+
+    for (const { recipeId } of saved) {
+      try {
+        const { data } = await mealdb.get("/lookup.php", {
+          params: { i: recipeId },
+        });
+
+        const meal = data.meals?.[0];
+        if (!meal) continue;
+
+        // --- FIXED: include measurements ---
+        const ingredients = Array.from({ length: 20 })
+          .map((_, i) => {
+            const name = meal[`strIngredient${i + 1}`];
+            const measure = meal[`strMeasure${i + 1}`];
+
+            if (name && name.trim()) {
+              return {
+                name: name.trim(),
+                measure: measure ? measure.trim() : "",
+              };
+            }
+
+            return null;
+          })
+          .filter(Boolean);
+
+        results.push({
+          recipeId,
+          title: meal.strMeal,
+          image: meal.strMealThumb,
+          ingredients,
+        });
+      } catch (err) {
+        console.error("MealDB fetch failed for:", recipeId, err);
+      }
+    }
+
+    res.json(results);
+    // console.log("Fetched saved recipes:", results);
+  } catch (err) {
+    console.error("Fetch saved recipes error:", err);
+    res.status(500).json({ error: "Failed to load saved recipes" });
   }
 });
 

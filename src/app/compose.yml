@@ -25,7 +25,8 @@ services:
       - /usr/src/app/node_modules
     ports:
       - "3001:3001"
-    command: ["sh", "-c", "npm install && npx prisma migrate deploy && npm run dev"]
+    command:
+      ["sh", "-c", "npm install && npx prisma migrate deploy && npm run dev"]
     env_file:
       - .env
 

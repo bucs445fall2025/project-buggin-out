@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "../styles/Recipes.css";
 import RecipeModal from "../components/RecipeModal.jsx";
+import { useAuth } from "../components/AuthContext"; // Import useAuth hook
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3001";
 
 export default function RecipesPage() {
+  const { isLoggedIn } = useAuth(); // Access isLoggedIn from AuthContext
   const [recipes, setRecipes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -102,14 +104,29 @@ export default function RecipesPage() {
     }
   };
 
+  // ⭐ UPDATED — Now only sends { recipeId } to backend
   const handleSaveRecipe = async (recipe) => {
-    const payload = { recipeId: recipe.id };
+    if (!isLoggedIn) {
+      alert("You must be logged in to save recipes.");
+      return;
+    }
+
+    const token = localStorage.getItem("token"); // Retrieve token from localStorage
+    if (!token) {
+      alert("Missing token. Please log in again.");
+      return;
+    }
+
+    const payload = {
+      recipeId: recipe.id, // ONLY store ID now
+    };
 
     try {
       const res = await fetch(`${API_BASE}/api/recipes/save`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
@@ -238,6 +255,7 @@ export default function RecipesPage() {
               />
               <h3>{recipe.title}</h3>
               <p className="mealdb-description">{recipe.description}</p>
+
               <div className="recipe-actions">
                 <button
                   className="view-recipe-button"

@@ -44,14 +44,13 @@ model Recipe {
   groceryIngredients Grocery[]
   macroEntries       Macro[]
   user               User          @relation(fields: [userId], references: [id])
-  savedRecipes       SavedRecipe[]
 }
 
 model SavedRecipe {
   id       Int    @id @default(autoincrement())
   userId   Int
-  recipeId Int
-  recipe   Recipe @relation(fields: [recipeId], references: [id])
+  recipeId String   // Only storing MealDB ID now (string)
+
   user     User   @relation(fields: [userId], references: [id])
 }
 
