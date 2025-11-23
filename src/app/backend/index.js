@@ -506,6 +506,96 @@ app.get("/api/recipes/saved", requireAuth, async (req, res) => {
   }
 });
 
+
+// === NUTRITION BY TITLE (macros + optional micros) =========================
+// GET /api/recipes/macrosByTitle?title=Chicken%20Alfredo
+// Returns: { title, image, macros: {protein, carbs, fat}, micros?: [...] }
+app.get("/api/recipes/macrosByTitle", async (req, res) => {
+  const title = (req.query.title || "").trim();
+  if (!title) {
+    return res.status(400).json({ error: "Missing 'title' query param" });
+  }
+
+  try {
+    // 1) Search Spoonacular by title and include nutrition
+    const { data } = await spoon.get("/recipes/complexSearch", {
+      params: {
+        query: title,
+        number: 1,
+        addRecipeInformation: true,
+        addRecipeNutrition: true,
+      },
+    });
+
+    const hit = data?.results?.[0];
+    if (!hit || !hit.nutrition?.nutrients) {
+      return res.status(404).json({
+        error:
+          "No nutrition found for that title (Spoonacular didn’t return nutrients).",
+      });
+    }
+
+    const nutrients = hit.nutrition.nutrients; // array: { name, amount, unit, ... }
+
+    // Helpers to pull a nutrient by exact Spoonacular name
+    const findAmt = (name) =>
+      nutrients.find((n) => n.name === name)?.amount ?? null;
+    const findUnit = (name) =>
+      nutrients.find((n) => n.name === name)?.unit ?? "";
+
+    // 2) Macros (rounded to whole grams)
+    const macros = {
+      protein: Math.round(findAmt("Protein") || 0),
+      carbs: Math.round(findAmt("Carbohydrates") || 0),
+      fat: Math.round(findAmt("Fat") || 0),
+    };
+
+    // 3) Curated micros set (keep names as users expect)
+    // If a nutrient isn’t present, we skip it.
+    const microNames = [
+      "Calories",
+      "Fiber",
+      "Sugar",
+      "Sodium",
+      "Cholesterol",
+      "Saturated Fat",
+      "Calcium",
+      "Iron",
+      "Potassium",
+      "Vitamin C",
+      "Vitamin A",
+      // You can add more: "Zinc", "Magnesium", "Folate", etc.
+    ];
+
+    const micros = microNames
+      .map((name) => {
+        const amt = findAmt(name);
+        if (amt === null || amt === undefined) return null;
+        return {
+          name,
+          amount: Math.round(amt),
+          unit: findUnit(name),
+        };
+      })
+      .filter(Boolean);
+
+    return res.json({
+      title: hit.title,
+      image: hit.image,
+      macros,
+      // only include micros if we actually found any
+      ...(micros.length ? { micros } : {}),
+    });
+  } catch (err) {
+    console.error("macrosByTitle error:", err.response?.data || err.message);
+    return res.status(err.response?.status || 500).json({
+      error: "Failed to fetch nutrition for title",
+      details: err.response?.data || err.message,
+    });
+  }
+});
+
+
 // ---------------------- Start server ----------------------
 app.listen(port, () => {
   console.log(`✅ Server is running at: http://localhost:${port}`);

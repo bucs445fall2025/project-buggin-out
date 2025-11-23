@@ -2,43 +2,33 @@
 import { useEffect, useState } from "react";
 import "../styles/Profile.css";
 
+const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
 const TABS = ["Journey", "Saved Recipes", "Posts"];
 
 export default function Profile() {
   const storage = window.sessionStorage;
+
+  // UI state
   const [active, setActive] = useState(TABS[0]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Profile state
+  const [displayName, setDisplayName] = useState("Loading…");
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [profileDescription, setProfileDescription] = useState("");
   const [avatarPreview, setAvatarPreview] = useState(
     () => storage.getItem("profile.avatarDataUrl") || ""
   );
 
-  // Open the modal
+  // Open / close modal
   const openModal = () => setIsModalOpen(true);
-
-  // Close the modal
   const closeModal = () => setIsModalOpen(false);
 
-  // Handle profile description change
-  const handleDescriptionChange = (e) => {
-    setProfileDescription(e.target.value);
-  };
+  // Handle description field
+  const handleDescriptionChange = (e) => setProfileDescription(e.target.value);
 
-  // Handle form submission
-  const handleSubmit = () => {
-    // Save the profile description and avatar (you can add API calls here)
-    localStorage.setItem("profile.bio", profileDescription);
-    localStorage.setItem("profile.avatarDataUrl", avatarPreview);
-
-    setBio(profileDescription);
-    setAvatar(avatarPreview);
-
-    // Close the modal after success
-    closeModal();
-  };
-
+  // Read local bio + avatar on mount
   useEffect(() => {
     setBio(
       localStorage.getItem("profile.bio") ||
@@ -47,6 +37,44 @@ export default function Profile() {
     setAvatar(localStorage.getItem("profile.avatarDataUrl") || "");
   }, []);
 
+  // Fetch name from backend (/api/me) using JWT
+  useEffect(() => {
+    const run = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setDisplayName("Guest");
+          return;
+        }
+        const res = await fetch(`${API_BASE}/api/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to load profile.");
+
+        const nameFromProfile = data?.profile?.displayName?.trim();
+        const fallbackFromEmail =
+          (data?.email && String(data.email).split("@")[0]) || null;
+
+        setDisplayName(nameFromProfile || fallbackFromEmail || "User");
+      } catch {
+        setDisplayName("User");
+      }
+    };
+    run();
+  }, []);
+
+  // Save profile (keeps your current local storage behavior)
+  const handleSubmit = () => {
+    localStorage.setItem("profile.bio", profileDescription);
+    localStorage.setItem("profile.avatarDataUrl", avatarPreview);
+
+    setBio(profileDescription);
+    setAvatar(avatarPreview);
+    closeModal();
+  };
+
+  // Avatar picker
   const onPickImage = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -65,7 +93,7 @@ export default function Profile() {
               className="pf-avatar"
               src={avatar}
               alt="User avatar"
-              style={{ objectFit: "cover" }} /* keeps image nicely cropped */
+              style={{ objectFit: "cover" }}
             />
           ) : (
             <div className="pf-avatar" aria-label="User avatar" />
@@ -73,11 +101,11 @@ export default function Profile() {
           <div className="pf-edit" onClick={openModal}>
             Edit Profile
           </div>
-          <div className="pf-name">Johnny Chan</div>
+          <div className="pf-name">{displayName}</div>
           <div className="pf-bio">{bio}</div>
         </aside>
 
-        {/* RIGHT: tab bar + content area (layout-only) */}
+        {/* RIGHT: tabs + content (layout) */}
         <main className="pf-right">
           <div className="pf-tabs" role="tablist" aria-label="Profile sections">
             {TABS.map((t) => (
@@ -122,9 +150,7 @@ export default function Profile() {
                 className="pf-file-input"
                 type="file"
                 accept="image/*"
-                onChange={(e) => {
-                  onPickImage(e);
-                }}
+                onChange={onPickImage}
               />
               {avatarPreview && (
                 <img
