@@ -595,6 +595,52 @@ app.get("/api/recipes/macrosByTitle", async (req, res) => {
   }
 });
 
+// Return only recipe IDs saved by the current user
+app.get("/api/recipes/saved/ids", requireAuth, async (req, res) => {
+  try {
+    const rows = await prisma.savedRecipe.findMany({
+      where: { userId: req.user.sub },
+      select: { recipeId: true },
+      orderBy: { id: "desc" },
+    });
+    res.json(rows); // [{recipeId: "52772"}, ...]
+  } catch (err) {
+    console.error("saved/ids error:", err);
+    res.status(500).json({ error: "Failed to load saved IDs" });
+  }
+});
+
+// Unsave a recipe for the current user
+app.post("/api/recipes/unsave", requireAuth, async (req, res) => {
+  const { recipeId } = req.body || {};
+  if (!recipeId) return res.status(400).json({ error: "recipeId required" });
+
+  try {
+    await prisma.savedRecipe.deleteMany({
+      where: { userId: req.user.sub, recipeId: String(recipeId) },
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("unsave error:", err);
+    res.status(500).json({ error: "Failed to remove recipe" });
+  }
+});
+
+// DELETE a saved recipe for the current user
+app.delete("/api/recipes/saved/:recipeId", requireAuth, async (req, res) => {
+  try {
+    const recipeId = String(req.params.recipeId);
+    // idempotent: deleteMany so it's safe even if the row isn't there
+    const result = await prisma.savedRecipe.deleteMany({
+      where: { userId: req.user.sub, recipeId },
+    });
+    return res.json({ ok: true, deleted: result.count });
+  } catch (err) {
+    console.error("Delete saved recipe error:", err);
+    return res.status(500).json({ error: "Failed to remove saved recipe" });
+  }
+});
+
 
 // ---------------------- Start server ----------------------
 app.listen(port, () => {

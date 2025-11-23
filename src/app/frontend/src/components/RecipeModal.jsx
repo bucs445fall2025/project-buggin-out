@@ -1,17 +1,42 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import "../styles/RecipeModal.css";
 
 export default function RecipeModal({
   isOpen,
   onClose,
   recipe,
-  onSaveRecipe,
-  savedRecipes = [],
+  onSaveRecipe,      // <-- same handler you use on the cards
+  savedRecipes = [], // <-- array of saved IDs (strings or numbers)
 }) {
   if (!isOpen || !recipe) return null;
 
+  const [saving, setSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
+
+  // Normalize ID comparisons (handles string vs number)
+  const isAlreadySaved = useMemo(() => {
+    const ids = (savedRecipes || []).map((x) => String(x));
+    return ids.includes(String(recipe.id)) || justSaved;
+  }, [savedRecipes, recipe.id, justSaved]);
+
+  const handleSaveClick = async () => {
+    if (isAlreadySaved || saving) return;
+    try {
+      setSaving(true);
+      // Support async or sync onSaveRecipe
+      const maybePromise = onSaveRecipe?.(recipe);
+      if (maybePromise && typeof maybePromise.then === "function") {
+        await maybePromise;
+      }
+      setJustSaved(true);
+    } catch (e) {
+      console.error("Save from modal failed:", e);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const ingredients = recipe.ingredients || [];
-  const isSaved = savedRecipes.includes(recipe.id);
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -19,8 +44,8 @@ export default function RecipeModal({
         className="recipe-modal-content"
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="modal-close" onClick={onClose}>
-          X
+        <button className="modal-close" onClick={onClose} aria-label="Close">
+          ×
         </button>
 
         <h2>{recipe.title}</h2>
@@ -39,8 +64,9 @@ export default function RecipeModal({
         <ul className="ingredient-list">
           {ingredients.map((item, idx) => (
             <li key={idx}>
-              <strong>{item.ingredient}</strong>
-              {item.measure && ` — ${item.measure}`}
+              <strong>{item.ingredient || item.name}</strong>
+              {(item.measure || item.unit) &&
+                ` — ${item.measure || item.unit}`}
             </li>
           ))}
         </ul>
@@ -56,13 +82,14 @@ export default function RecipeModal({
             </a>
           </p>
         )}
+
         {/* ADD RECIPE BUTTON */}
         <button
           className="add-recipe-btn"
-          onClick={() => onSaveRecipe(recipe)}
-          disabled={isSaved}
+          onClick={handleSaveClick}
+          disabled={isAlreadySaved || saving}
         >
-          {isSaved ? "Saved" : "Add Recipe"}
+          {isAlreadySaved ? "Saved" : saving ? "Saving…" : "Add Recipe"}
         </button>
       </div>
     </div>
