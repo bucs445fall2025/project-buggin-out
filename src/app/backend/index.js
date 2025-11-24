@@ -446,10 +446,6 @@ app.post("/api/recipes/save", requireAuth, async (req, res) => {
 });
 
 //GET saved recipes for user
-// GET /api/recipes/saved
-// GET /api/recipes/saved
-// Returns FULL recipe data: title + ingredients
-// GET /api/recipes/saved
 app.get("/api/recipes/saved", requireAuth, async (req, res) => {
   try {
     const saved = await prisma.savedRecipe.findMany({
@@ -505,7 +501,6 @@ app.get("/api/recipes/saved", requireAuth, async (req, res) => {
     res.status(500).json({ error: "Failed to load saved recipes" });
   }
 });
-
 
 // === NUTRITION BY TITLE (macros + optional micros) =========================
 // GET /api/recipes/macrosByTitle?title=Chicken%20Alfredo
@@ -640,7 +635,6 @@ app.delete("/api/recipes/saved/:recipeId", requireAuth, async (req, res) => {
     return res.status(500).json({ error: "Failed to remove saved recipe" });
   }
 });
-
 
 // ---------------------- Start server ----------------------
 app.listen(port, () => {

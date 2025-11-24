@@ -114,9 +114,43 @@ export default function MacroTracker() {
     return saved.filter((r) => (r.title || "").toLowerCase().includes(q));
   }, [saved, query]);
 
-  const removeLocal = (rid) => {
+  const removeRecipe = async (rid) => {
+    // Optimistically remove the recipe from the local state
     setSaved((list) => list.filter((r) => r.recipeId !== rid));
     if (selectedId === rid) setSelectedId(null);
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in to delete recipes.");
+        return;
+      }
+
+      const res = await fetch(`${API_BASE}/api/recipes/saved/${rid}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data?.error || "Failed to delete the recipe.");
+      }
+
+      const data = await res.json();
+      if (data.ok) {
+        console.log(`Recipe ${rid} deleted successfully.`);
+      }
+    } catch (err) {
+      console.error("Error deleting recipe:", err);
+      alert(err.message || "Failed to delete the recipe.");
+      // Optionally, re-add the recipe to the local state if the delete fails
+      setSaved((list) => [...list, saved.find((r) => r.recipeId === rid)]);
+    }
+  };
+  const confirmDelete = (rid) => {
+    if (window.confirm("Are you sure you want to delete this recipe?")) {
+      removeLocal(rid);
+    }
   };
 
   return (
@@ -172,8 +206,8 @@ export default function MacroTracker() {
                   </button>
                   <button
                     className="mtkt-remove"
-                    onClick={() => removeLocal(r.recipeId)}
-                    title="Remove (local view only)"
+                    onClick={() => confirmDelete(r.recipeId)}
+                    title="Remove from saved"
                   >
                     ✕
                   </button>
@@ -198,11 +232,7 @@ export default function MacroTracker() {
           ) : (
             <div className="mtkt-card">
               <div className="mtkt-detail-head">
-                <img
-                  className="mtkt-detail-img"
-                  src={selected.image}
-                  alt=""
-                />
+                <img className="mtkt-detail-img" src={selected.image} alt="" />
                 <h3 className="mtkt-recipe-name">{selected.title}</h3>
               </div>
 
@@ -211,7 +241,11 @@ export default function MacroTracker() {
               ) : macros ? (
                 <>
                   <div className="mtkt-macros" style={{ marginTop: ".75rem" }}>
-                    <MacroTile label="Protein" value={macros.protein} unit="g" />
+                    <MacroTile
+                      label="Protein"
+                      value={macros.protein}
+                      unit="g"
+                    />
                     <MacroTile label="Carbs" value={macros.carbs} unit="g" />
                     <MacroTile label="Fat" value={macros.fat} unit="g" />
                   </div>
@@ -289,8 +323,10 @@ function guessUnit(k) {
     "transFat",
     "alcohol",
   ];
-  if (k.toLowerCase() === "calories" || k.toLowerCase() === "energy") return "kcal";
-  if (k.toLowerCase() === "sodium" || k.toLowerCase() === "potassium") return "mg";
+  if (k.toLowerCase() === "calories" || k.toLowerCase() === "energy")
+    return "kcal";
+  if (k.toLowerCase() === "sodium" || k.toLowerCase() === "potassium")
+    return "mg";
   if (k.toLowerCase() === "cholesterol") return "mg";
   if (gramsLike.includes(k)) return "g";
   return "";
