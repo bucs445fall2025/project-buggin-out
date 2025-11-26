@@ -12,10 +12,12 @@ model User {
   email        String        @unique
   passwordHash String
   createdAt    DateTime      @default(now())
-  comments     Comment[]
   profile      Profile?
   recipes      Recipe[]
   savedRecipes SavedRecipe[]
+  posts       Post[]
+  postComments PostComment[]
+  postLikes    PostLike[]
 }
 
 model Profile {
@@ -27,13 +29,6 @@ model Profile {
   user        User   @relation(fields: [userId], references: [id])
 }
 
-model Comment {
-  id        Int      @id @default(autoincrement())
-  content   String
-  createdAt DateTime @default(now())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-}
 
 model Recipe {
   id                 Int           @id @default(autoincrement())
@@ -72,3 +67,43 @@ model Macro {
   recipeId Int
   recipe   Recipe @relation(fields: [recipeId], references: [id])
 }
+
+model Post {
+  id        Int       @id @default(autoincrement())
+  content   String
+  imageUrl  String?
+  createdAt DateTime  @default(now())
+
+  userId    Int
+  user      User      @relation(fields: [userId], references: [id])
+
+  comments  PostComment[]
+  likes     PostLike[]
+}
+
+model PostComment {
+  id        Int      @id @default(autoincrement())
+  text      String
+  createdAt DateTime @default(now())
+
+  postId    Int
+  userId    Int
+
+  post      Post @relation(fields: [postId], references: [id])
+  user      User @relation(fields: [userId], references: [id])
+}
+
+model PostLike {
+  id        Int      @id @default(autoincrement())
+
+  postId    Int
+  userId    Int
+
+  post      Post @relation(fields: [postId], references: [id])
+  user      User @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId]) // prevents double likes
+}
+
+
+

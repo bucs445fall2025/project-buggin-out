@@ -1,0 +1,202 @@
+/* src/styles/Posts.css */
+
+.posts-page {
+  padding: 90px 16px 40px; /* leave room for fixed navbar; adjust if your navbar is a different height */
+  display: flex;
+  justify-content: center;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: #f5f7fb;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.posts-container {
+padding-top: 90px;
+  width: 100%;
+  max-width: 800px;
+}
+
+/* Title */
+.posts-title {
+  margin: 0 0 1rem 0;
+  font-size: 1.6rem;
+  color: #222;
+  text-align: left;
+}
+
+/* Post form */
+.post-form {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 1px 4px rgba(16, 24, 40, 0.06);
+  border: 1px solid rgba(16, 24, 40, 0.04);
+}
+
+.post-textarea {
+  width: 100%;
+  min-height: 90px;
+  resize: vertical;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e6e9ef;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.post-textarea:focus {
+  border-color: #0095f6;
+  box-shadow: 0 0 0 3px rgba(0, 149, 246, 0.08);
+}
+
+/* row with file and button */
+.post-form-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+/* File input styling */
+.file-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  border: 1px dashed #d9dbe0;
+  background: #fafbfc;
+  cursor: pointer;
+  flex: 1;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-cta {
+  font-size: 13px;
+  color: #0a66c2;
+  font-weight: 600;
+}
+
+.file-name {
+  margin-left: auto;
+  font-size: 13px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 45%;
+}
+
+/* Post button */
+.btn-post {
+  background: #0a84ff;
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-post[disabled],
+.btn-post[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Error */
+.form-error {
+  margin-top: 0.6rem;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+/* Feed */
+.posts-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Single post card */
+.post-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 0.9rem;
+  border: 1px solid rgba(16, 24, 40, 0.04);
+  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.04);
+}
+
+.post-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.6rem;
+}
+
+.post-author {
+  font-weight: 700;
+  font-size: 14px;
+  color: #111827;
+}
+
+.post-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* image */
+.post-image-wrap {
+  margin: 0.5rem 0;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.post-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+/* content */
+.post-content {
+  margin: 0.5rem 0;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.4;
+}
+
+/* actions (delete, like etc) */
+.post-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* delete button (style as subtle) */
+.btn-delete {
+  background: transparent;
+  border: 1px solid #f1f1f1;
+  padding: 0.35rem 0.6rem;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #ef4444;
+  font-size: 13px;
+}
+
+/* responsive */
+@media (max-width: 520px) {
+  .file-name {
+    max-width: 35%;
+  }
+  .posts-container {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}

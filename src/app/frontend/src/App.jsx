@@ -9,6 +9,7 @@ import Grocery from "./pages/Grocery"
 import Login from "./pages/Login";
 import AccountSetup from "./pages/AccountSetup";
 import NavBar from "./components/NavBar";
+import Posts from "./pages/Posts";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/grocery" element={<Grocery />} />
+        <Route path="/posts" element={<Posts />} />
       </Routes>
     </>
   );

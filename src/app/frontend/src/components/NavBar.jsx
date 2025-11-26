@@ -22,6 +22,7 @@ function NavBar() {
         <li><Link to="/recipes">Recipes</Link></li>
         <li><Link to="/grocery">Grocery</Link></li>
         <li><Link to="/macro">Macro Tracker</Link></li>
+        <li><Link to="/posts">Posts</Link></li>
         <li><Link to="/profile">Profile</Link></li>
       </ul>
       <ul className="nav-right">

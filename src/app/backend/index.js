@@ -5,6 +5,18 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
+const multer = require("multer");
+const path = require("path");
+
+// Store uploads in /uploads
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => cb(null, "uploads/"),
+    filename: (req, file, cb) =>
+      cb(null, Date.now() + "_" + Math.round(Math.random() * 1e9) + path.extname(file.originalname)),
+  }),
+});
+
 
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
@@ -48,6 +60,9 @@ console.log("CORS middleware applied!");
 
 // Parse JSON request bodies
 app.use(express.json());
+
+app.use("/uploads", express.static("uploads"));
+
 
 // ---------------------- Spoonacular API setup ----------------------
 const SPOON_API_KEY = process.env.SPOON_API_KEY;
@@ -638,6 +653,116 @@ app.delete("/api/recipes/saved/:recipeId", requireAuth, async (req, res) => {
   } catch (err) {
     console.error("Delete saved recipe error:", err);
     return res.status(500).json({ error: "Failed to remove saved recipe" });
+  }
+});
+
+
+
+
+
+
+
+// === POSTS, LIKES, AND COMMENTS ROUTES ======================
+// GET all posts
+app.get("/api/posts", async (req, res) => {
+  try {
+    const posts = await prisma.post.findMany({
+      include: {
+        user: { select: { id: true, email: true } },
+        comments: {
+          include: { user: { select: { id: true, email: true } } },
+          orderBy: { createdAt: "asc" },
+        },
+        likes: true,
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    res.json(posts);
+  } catch (err) {
+    console.error("Fetch posts error:", err);
+    res.status(500).json({ error: "Failed to fetch posts" });
+  }
+});
+
+// CREATE post (supports image upload)
+app.post("/api/posts", requireAuth, upload.single("image"), async (req, res) => {
+  try {
+    const { content } = req.body;
+
+    if (!content && !req.file) {
+      return res.status(400).json({ error: "Post must contain text or image" });
+    }
+
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+
+    console.log("USER ID:", req.user?.sub);
+    console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
+    console.log("prisma.post:", prisma.post);
+
+    const post = await prisma.post.create({
+      data: {
+        content: content || "",
+        imageUrl,
+        userId: req.user.sub,
+      },
+    });
+
+    res.status(201).json(post);
+  } catch (err) {
+    console.error("Create post error:", err);
+    res.status(500).json({ error: "Failed to create post111" });
+  }
+});
+
+// COMMENT on post
+app.post("/api/posts/:id/comment", requireAuth, async (req, res) => {
+  try {
+    const postId = Number(req.params.id);
+    const { text } = req.body;
+
+    if (!text) return res.status(400).json({ error: "Text required" });
+
+    const comment = await prisma.postComment.create({
+      data: {
+        text,
+        postId,
+        userId: req.user.sub,
+      },
+      include: {
+        user: { select: { id: true, email: true } },
+      },
+    });
+
+    res.status(201).json(comment);
+  } catch (err) {
+    console.error("Comment error:", err);
+    res.status(500).json({ error: "Failed to add comment" });
+  }
+});
+
+// LIKE post
+app.post("/api/posts/:id/like", requireAuth, async (req, res) => {
+  try {
+    const postId = Number(req.params.id);
+
+    const already = await prisma.postLike.findFirst({
+      where: { postId, userId: req.user.sub },
+    });
+
+    if (already) {
+      return res.status(409).json({ error: "Already liked" });
+    }
+
+    const like = await prisma.postLike.create({
+      data: { postId, userId: req.user.sub },
+    });
+
+    res.json(like);
+  } catch (err) {
+    console.error("Like error:", err);
+    res.status(500).json({ error: "Failed to like post" });
   }
 });
 
