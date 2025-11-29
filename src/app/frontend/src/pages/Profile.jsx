@@ -1,5 +1,5 @@
 // src/pages/Profile.jsx
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import "../styles/Profile.css";
 
 const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
@@ -8,11 +8,11 @@ const TABS = ["Journey", "Saved Recipes", "Posts"];
 export default function Profile() {
   const storage = window.sessionStorage;
 
-  // UI state
+  // Tabs / modal
   const [active, setActive] = useState(TABS[0]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Profile state
+  // Profile basics
   const [displayName, setDisplayName] = useState("Loading…");
   const [bio, setBio] = useState("");
   const [avatar, setAvatar] = useState("");
@@ -27,14 +27,23 @@ export default function Profile() {
   const [savedError, setSavedError] = useState("");
   const [savedQuery, setSavedQuery] = useState("");
 
-  // Open / close modal
+  // My posts state
+  const [myPosts, setMyPosts] = useState([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
+  const [postsError, setPostsError] = useState("");
+
+  // Journey (diary) state
+  const [journeyEntries, setJourneyEntries] = useState([]);
+  const [loadingJourney, setLoadingJourney] = useState(true);
+  const [journeyError, setJourneyError] = useState("");
+  const [entryTitle, setEntryTitle] = useState("");
+  const [entryText, setEntryText] = useState("");
+
+  // Modal open/close
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  // Handle description field
-  const handleDescriptionChange = (e) => setProfileDescription(e.target.value);
-
-  // Read local bio + avatar on mount
+  // Local bio/avatar on mount
   useEffect(() => {
     setBio(
       localStorage.getItem("profile.bio") ||
@@ -43,7 +52,7 @@ export default function Profile() {
     setAvatar(localStorage.getItem("profile.avatarDataUrl") || "");
   }, []);
 
-  // Fetch name from backend (/api/me) using JWT
+  // Load display name from backend
   useEffect(() => {
     const run = async () => {
       try {
@@ -70,9 +79,9 @@ export default function Profile() {
     run();
   }, []);
 
-  // Load saved recipes for this user
+  // Load saved recipes
   useEffect(() => {
-    const load = async () => {
+    const loadSaved = async () => {
       setLoadingSaved(true);
       setSavedError("");
       try {
@@ -94,10 +103,64 @@ export default function Profile() {
         setLoadingSaved(false);
       }
     };
-    load();
+    loadSaved();
   }, []);
 
-  // Save profile (keeps your current local storage behavior)
+  // Load my posts
+  useEffect(() => {
+    const loadMine = async () => {
+      setLoadingPosts(true);
+      setPostsError("");
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setMyPosts([]);
+          setPostsError("You must be logged in to see your posts.");
+          return;
+        }
+        const res = await fetch(`${API_BASE}/api/posts/mine`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to load posts");
+        setMyPosts(Array.isArray(data) ? data : []);
+      } catch (e) {
+        setPostsError(e.message || "Failed to load your posts.");
+      } finally {
+        setLoadingPosts(false);
+      }
+    };
+    loadMine();
+  }, []);
+
+  // Load my journey entries
+  useEffect(() => {
+    const loadJourney = async () => {
+      setLoadingJourney(true);
+      setJourneyError("");
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setJourneyEntries([]);
+          setJourneyError("You must be logged in to view your journey.");
+          return;
+        }
+        const res = await fetch(`${API_BASE}/api/journey`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data?.error || "Failed to load journey");
+        setJourneyEntries(Array.isArray(data) ? data : []);
+      } catch (e) {
+        setJourneyError(e.message || "Failed to load journey.");
+      } finally {
+        setLoadingJourney(false);
+      }
+    };
+    loadJourney();
+  }, []);
+
+  // Save profile (local-only)
   const handleSubmit = () => {
     localStorage.setItem("profile.bio", profileDescription);
     localStorage.setItem("profile.avatarDataUrl", avatarPreview);
@@ -115,7 +178,7 @@ export default function Profile() {
     reader.readAsDataURL(file);
   };
 
-  // Remove a saved recipe for this user
+  // Remove saved recipe
   const removeSaved = async (recipeId) => {
     const sure = confirm("Remove this recipe from your saved list?");
     if (!sure) return;
@@ -131,21 +194,102 @@ export default function Profile() {
         const data = await res.json().catch(() => ({}));
         throw new Error(data?.error || `Delete failed (HTTP ${res.status})`);
       }
-      // Optimistically update UI
-      setSaved((list) => list.filter((r) => String(r.recipeId) !== String(recipeId)));
+      setSaved((list) =>
+        list.filter((r) => String(r.recipeId) !== String(recipeId))
+      );
     } catch (e) {
       alert(e.message || "Failed to remove saved recipe.");
     }
   };
 
-  // Filter saved list by title
+  // Delete a post (from Profile > Your Posts)
+  const removePost = async (postId) => {
+    const sure = confirm("Delete this post?");
+    if (!sure) return;
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Not authenticated");
+      const res = await fetch(`${API_BASE}/api/posts/${postId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error || `Delete failed (HTTP ${res.status})`);
+      }
+      setMyPosts((list) => list.filter((p) => p.id !== postId));
+    } catch (e) {
+      alert(e.message || "Failed to delete post.");
+    }
+  };
+
+  // Create a journey entry
+  const addJourneyEntry = async (e) => {
+    e?.preventDefault?.();
+    setJourneyError("");
+    const text = entryText.trim();
+    const title = entryTitle.trim();
+    if (!text) {
+      setJourneyError("Entry text cannot be empty.");
+      return;
+    }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setJourneyError("You must be logged in to save entries.");
+      return;
+    }
+
+    try {
+      const res = await fetch(`${API_BASE}/api/journey`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content: text, title }),
+      });
+      const created = await res.json();
+      if (!res.ok) throw new Error(created?.error || "Failed to save entry");
+
+      // Add to top
+      setJourneyEntries((list) => [created, ...list]);
+      setEntryTitle("");
+      setEntryText("");
+    } catch (err) {
+      setJourneyError(err.message || "Failed to save entry.");
+    }
+  };
+
+  // Delete a journey entry
+  const deleteJourneyEntry = async (id) => {
+    const sure = confirm("Delete this entry?");
+    if (!sure) return;
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setJourneyError("You must be logged in to delete entries.");
+      return;
+    }
+    try {
+      const res = await fetch(`${API_BASE}/api/journey/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || "Delete failed");
+      setJourneyEntries((list) => list.filter((e) => e.id !== id));
+    } catch (err) {
+      setJourneyError(err.message || "Failed to delete entry.");
+    }
+  };
+
+  // Filter saved list
   const filteredSaved = useMemo(() => {
     const q = savedQuery.trim().toLowerCase();
     if (!q) return saved;
     return saved.filter((r) => (r.title || "").toLowerCase().includes(q));
   }, [saved, savedQuery]);
 
-  // ----- Render helpers -----
+  // ------- Render helpers -------
   const renderSavedTab = () => (
     <div className="pf-saved-wrap">
       <div className="pf-saved-head">
@@ -190,6 +334,113 @@ export default function Profile() {
     </div>
   );
 
+  const renderPostsTab = () => (
+    <div className="pf-posts-wrap">
+      <h3 className="pf-posts-title">Your Posts</h3>
+
+      {loadingPosts && <div className="pf-note">Loading…</div>}
+      {!loadingPosts && postsError && (
+        <div className="pf-error" role="alert">
+          {postsError}
+        </div>
+      )}
+      {!loadingPosts && !postsError && myPosts.length === 0 && (
+        <div className="pf-note">You haven’t posted anything yet.</div>
+      )}
+
+      <div className="pf-posts-grid">
+        {myPosts.map((p) => {
+          const created = p.createdAt
+            ? new Date(p.createdAt).toLocaleString()
+            : "";
+          return (
+            <article key={p.id} className="pf-post-card">
+              {p.imageUrl && (
+                <div className="pf-post-imgwrap">
+                  <img src={p.imageUrl} alt="" className="pf-post-img" />
+                </div>
+              )}
+              {p.content && <p className="pf-post-text">{p.content}</p>}
+              <div className="pf-post-foot">
+                <span className="pf-post-date">{created}</span>
+                <button
+                  className="pf-post-delete"
+                  onClick={() => removePost(p.id)}
+                  title="Delete post"
+                >
+                  Delete
+                </button>
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  const renderJourneyTab = () => (
+    <div className="pf-journey-wrap">
+      <h3 className="pf-journey-title">Your Journey</h3>
+
+      {/* Composer */}
+      <form className="pf-journey-form" onSubmit={addJourneyEntry}>
+        <input
+          type="text"
+          className="pf-journey-input"
+          placeholder="Title (optional)"
+          value={entryTitle}
+          onChange={(e) => setEntryTitle(e.target.value)}
+          maxLength={120}
+        />
+        <textarea
+          className="pf-journey-textarea"
+          placeholder="Write a quick entry about your day, progress, or goals…"
+          value={entryText}
+          onChange={(e) => setEntryText(e.target.value)}
+          rows={5}
+          maxLength={5000}
+        />
+        <div className="pf-journey-actions">
+          <button className="pf-journey-save" type="submit">
+            Save Entry
+          </button>
+        </div>
+        {journeyError && <div className="pf-error" role="alert">{journeyError}</div>}
+      </form>
+
+      {/* List */}
+      {loadingJourney ? (
+        <div className="pf-note">Loading…</div>
+      ) : journeyEntries.length === 0 ? (
+        <div className="pf-note">No entries yet. Start your journey above!</div>
+      ) : (
+        <div className="pf-journey-list">
+          {journeyEntries.map((e) => {
+            const when = e.createdAt ? new Date(e.createdAt).toLocaleString() : "";
+            return (
+              <article key={e.id} className="pf-journey-card">
+                <div className="pf-journey-head">
+                  <div className="pf-journey-titleline">
+                    <div className="pf-journey-card-title">{e.title || "Untitled Entry"}</div>
+                    <div className="pf-journey-date">{when}</div>
+                  </div>
+                  <button
+                    className="pf-journey-delete"
+                    onClick={() => deleteJourneyEntry(e.id)}
+                    title="Delete entry"
+                  >
+                    Delete
+                  </button>
+                </div>
+                <div className="pf-journey-content">{e.content}</div>
+              </article>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="pf-container">
       <div className="pf-shell">
@@ -231,11 +482,10 @@ export default function Profile() {
           <section className="pf-content" role="tabpanel">
             {active === "Saved Recipes" ? (
               renderSavedTab()
+            ) : active === "Posts" ? (
+              renderPostsTab()
             ) : (
-              <div className="pf-content-placeholder">
-                <h3>{active}</h3>
-                <p>This area will display your {active.toLowerCase()}.</p>
-              </div>
+              renderJourneyTab()
             )}
           </section>
         </main>
@@ -247,15 +497,13 @@ export default function Profile() {
           <div className="modal-content">
             <h2>Edit Profile</h2>
 
-            {/* Profile Description */}
             <textarea
               className="pf-textarea"
               value={profileDescription}
-              onChange={handleDescriptionChange}
+              onChange={(e) => setProfileDescription(e.target.value)}
               placeholder="Edit your profile description"
             />
 
-            {/* Profile Picture */}
             <div>
               <input
                 className="pf-file-input"
@@ -272,10 +520,7 @@ export default function Profile() {
               )}
             </div>
 
-            {/* Submit Button */}
             <button onClick={handleSubmit}>Submit</button>
-
-            {/* Close Modal */}
             <button onClick={closeModal} style={{ marginLeft: "10px" }}>
               Cancel
             </button>

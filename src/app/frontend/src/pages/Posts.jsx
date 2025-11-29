@@ -1,6 +1,5 @@
 // src/pages/Posts.jsx
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../components/AuthContext";
 import "../styles/Posts.css";
 
@@ -8,32 +7,87 @@ const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
 
 export default function Posts() {
   const { isLoggedIn } = useAuth();
-  const navigate = useNavigate();
 
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [me, setMe] = useState(null); // { id, email, ... } for like detection
 
   // form state
   const [content, setContent] = useState("");
   const [file, setFile] = useState(null);
   const [error, setError] = useState("");
 
+  // UI state
+  const [expandedIds, setExpandedIds] = useState(() => new Set());
+
   const token = localStorage.getItem("token");
 
-  // Redirect if not logged in
+  const getInitials = (nameOrEmail = "") => {
+    const base = String(nameOrEmail || "").replace(/@.*/, "").trim();
+    const parts = base.split(/[.\s_]+/).filter(Boolean);
+    if (parts.length === 0) return base.slice(0, 2).toUpperCase();
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  };
 
-  // load posts
+  const timeAgo = (iso) => {
+    if (!iso) return "";
+    const then = new Date(iso).getTime();
+    const now = Date.now();
+    const s = Math.max(1, Math.floor((now - then) / 1000));
+    const intervals = [
+      ["y", 31536000],
+      ["mo", 2592000],
+      ["w", 604800],
+      ["d", 86400],
+      ["h", 3600],
+      ["m", 60],
+      ["s", 1],
+    ];
+    for (const [label, sec] of intervals) {
+      const v = Math.floor(s / sec);
+      if (v >= 1) return `${v}${label}`;
+    }
+    return "now";
+  };
+
+  const toggleExpand = (id) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  // Load "me" (so we can tell if I liked a post)
+  useEffect(() => {
+    const loadMe = async () => {
+      try {
+        if (!token) return;
+        const res = await fetch(`${API_BASE}/api/me`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        if (res.ok) setMe(data);
+      } catch {
+        // ignore
+      }
+    };
+    loadMe();
+  }, [token]);
+
+  // Load posts
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${API_BASE}/api/posts`); // ensure backend provides this
+        const res = await fetch(`${API_BASE}/api/posts`);
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || "Failed to load posts");
         setPosts(data);
       } catch (err) {
-        console.error("Load posts error:", err);
         setError(err.message || "Failed to load posts");
       } finally {
         setLoading(false);
@@ -42,12 +96,9 @@ export default function Posts() {
     load();
   }, []);
 
-  // handle file input change
-  const onFileChange = (e) => {
-    setFile(e.target.files?.[0] || null);
-  };
+  const onFileChange = (e) => setFile(e.target.files?.[0] || null);
 
-  // submit new post — uses multipart/form-data so multer can handle file
+  // Create a post
   const handleSubmit = async (e) => {
     e?.preventDefault?.();
     setError("");
@@ -66,137 +117,227 @@ export default function Posts() {
 
       const form = new FormData();
       form.append("content", content.trim());
-      // multer expects the file field name the server uses
       if (file) form.append("image", file);
 
       const res = await fetch(`${API_BASE}/api/posts`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`, 
-        },
+        headers: { Authorization: `Bearer ${token}` },
         body: form,
       });
 
       const created = await res.json();
       if (!res.ok) throw new Error(created?.error || "Failed to create post");
 
-      // The server should return the created post including user and imageUrl fields.
-      setPosts((p) => [created, ...p]);
+      // Ensure likes array is present for new post
+      const normalized = { ...created, likes: created.likes || [] };
+
+      setPosts((p) => [normalized, ...p]);
       setContent("");
       setFile(null);
-      // reset file input value: will use DOM; find input by id later in markup
       const fileInput = document.getElementById("post-image-input");
       if (fileInput) fileInput.value = "";
     } catch (err) {
-      console.error("Create post error:", err);
-      setError(err.message || "Failed to create post111111");
+      setError(err.message || "Failed to create post");
     } finally {
       setSubmitting(false);
     }
   };
 
-  // optional: handle simple delete (requires backend endpoint /api/posts/:id DELETE)
-  const handleDelete = async (postId) => {
-    if (!confirm("Delete this post?")) return;
-    if (!token) return setError("You must be logged in to delete posts.");
+    // Like/unlike toggle with optimistic UI then authoritative reconcile
+  const toggleLike = async (postId) => {
+    if (!isLoggedIn || !token || !me?.id) {
+      setError("You must be logged in to like posts.");
+      return;
+    }
+
+    // optimistic flip
+    setPosts((prev) =>
+      prev.map((p) => {
+        if (p.id !== postId) return p;
+        const hasLiked = (p.likes || []).some((lk) => lk.userId === me.id);
+        return hasLiked
+          ? { ...p, likes: (p.likes || []).filter((lk) => lk.userId !== me.id) }
+          : { ...p, likes: [...(p.likes || []), { userId: me.id, postId }] };
+      })
+    );
+
     try {
-      const res = await fetch(`${API_BASE}/api/posts/${postId}`, {
-        method: "DELETE",
+      const res = await fetch(`${API_BASE}/api/posts/${postId}/like`, {
+        method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) {
-        const d = await res.json();
-        throw new Error(d?.error || "Failed to delete");
-      }
-      setPosts((p) => p.filter((x) => x.id !== postId));
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Failed to toggle like");
+
+      // Authoritative reconcile — replace likes with what the server returns
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === postId ? { ...p, likes: Array.isArray(data.likes) ? data.likes : [] } : p
+        )
+      );
     } catch (err) {
-      console.error(err);
-      setError(err.message || "Delete failed");
+      // revert optimistic if server failed
+      setPosts((prev) =>
+        prev.map((p) => {
+          if (p.id !== postId) return p;
+          const hasLiked = (p.likes || []).some((lk) => lk.userId === me.id);
+          // We don't know the true server state, so just invert back
+          return hasLiked
+            ? { ...p, likes: (p.likes || []).filter((lk) => lk.userId !== me.id) }
+            : { ...p, likes: [...(p.likes || []), { userId: me.id, postId }] };
+        })
+      );
+      setError(err.message || "Failed to toggle like");
     }
   };
 
+
+  const skeletons = useMemo(() => Array.from({ length: 4 }), []);
+
   return (
     <div className="posts-page">
-      <div className="posts-container">
-        <h1 className="posts-title">Feed</h1>
+      <div className="feed-shell">
+        <div className="feed-left">
+          <section className="composer-card">
+            <div className="composer-head">
+              <div className="composer-title">Create a post</div>
+              <div className="composer-sub">What’s cooking today?</div>
+            </div>
 
-        <form className="post-form" onSubmit={handleSubmit}>
-          <textarea
-            placeholder="What's cooking? Share a tip, recipe, or photo..."
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="post-textarea"
-            maxLength={2000}
-          />
-
-          <div className="post-form-row">
-            <label className="file-label">
-              <input
-                id="post-image-input"
-                type="file"
-                accept="image/*"
-                onChange={onFileChange}
-                className="file-input"
+            <form className="composer-form" onSubmit={handleSubmit}>
+              <textarea
+                placeholder="Write a caption, tip, or quick update..."
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="composer-textarea"
+                maxLength={2000}
               />
-              <span className="file-cta">Choose image</span>
-              <span className="file-name">{file ? file.name : "No file selected"}</span>
-            </label>
+              <div className="composer-row">
+                <label className="file-label">
+                  <input
+                    id="post-image-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={onFileChange}
+                    className="file-input"
+                  />
+                  <span className="file-cta">Upload image</span>
+                  <span className="file-name">
+                    {file ? file.name : "No file selected"}
+                  </span>
+                </label>
 
-            <button
-              className="btn-post"
-              type="submit"
-              disabled={submitting}
-              aria-disabled={submitting}
-            >
-              {submitting ? "Posting…" : "Post"}
-            </button>
-          </div>
+                <button
+                  className="btn-post"
+                  type="submit"
+                  disabled={submitting}
+                  aria-disabled={submitting}
+                >
+                  {submitting ? "Posting…" : "Post"}
+                </button>
+              </div>
 
-          {error && <div className="form-error">{error}</div>}
-        </form>
+              {error && <div className="form-error">{error}</div>}
+            </form>
+          </section>
 
-        {loading ? (
-          <div className="loading">Loading posts…</div>
-        ) : posts.length === 0 ? (
-          <div className="empty">No posts yet.</div>
-        ) : (
-          <div className="posts-feed">
-            {posts.map((p) => {
-              const authorName =
-                p.user?.profile?.displayName || p.user?.email || "Unknown user";
-              const created = p.createdAt ? new Date(p.createdAt).toLocaleString() : "";
-
-              return (
-                <article className="post-card" key={p.id}>
+          {loading ? (
+            <div className="feed-list">
+              {skeletons.map((_, i) => (
+                <article className="post-card skeleton" key={i}>
                   <div className="post-header">
-                    <div className="post-author">{authorName}</div>
-                    <div className="post-date">{created}</div>
-                  </div>
-
-                  {p.imageUrl && (
-                    <div className="post-image-wrap">
-                      <img src={p.imageUrl} alt={p.content?.slice(0, 50) || "post image"} className="post-image" />
+                    <div className="avatar skeleton-box" />
+                    <div className="ph-lines">
+                      <div className="ph-line skeleton-box" />
+                      <div className="ph-line short skeleton-box" />
                     </div>
-                  )}
-
-                  {p.content && <p className="post-content">{p.content}</p>}
-
-                  <div className="post-actions">
-                    {/* If you implement likes/comments endpoints, hook them here */}
-                    {/* Example delete button (only show if current user's id matches - server should enforce) */}
-                    <button
-                      className="btn-delete"
-                      onClick={() => handleDelete(p.id)}
-                      aria-label="Delete post"
-                    >
-                      Delete
-                    </button>
                   </div>
+                  <div className="post-image-wrap skeleton-box" />
+                  <div className="post-content skeleton-box" />
                 </article>
-              );
-            })}
-          </div>
-        )}
+              ))}
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="empty">No posts yet.</div>
+          ) : (
+            <div className="feed-list">
+              {posts.map((p) => {
+                const authorName =
+                  p.user?.profile?.displayName || p.user?.email || "Unknown user";
+                const initials = getInitials(
+                  p.user?.profile?.displayName || p.user?.email || "U"
+                );
+                const created = p.createdAt ? timeAgo(p.createdAt) : "";
+                const likeCount = Array.isArray(p.likes) ? p.likes.length : 0;
+                const iLiked = me?.id
+                  ? (p.likes || []).some((lk) => lk.userId === me.id)
+                  : false;
+                const isExpanded = expandedIds.has(p.id);
+                const text = p.content || "";
+
+                return (
+                  <article className="post-card" key={p.id}>
+                    <header className="post-header">
+                      <div className="post-header-left">
+                        <div className="avatar" aria-hidden="true">
+                          {initials}
+                        </div>
+                        <div className="post-meta">
+                          <div className="post-author">{authorName}</div>
+                          <div className="post-date">{created}</div>
+                        </div>
+                      </div>
+                    </header>
+
+                    {p.imageUrl && (
+                      <div className="post-image-wrap">
+                        <img
+                          src={p.imageUrl}
+                          alt={text.slice(0, 80) || "post image"}
+                          className="post-image"
+                          loading="lazy"
+                        />
+                      </div>
+                    )}
+
+                    <div className="post-actions">
+                      <button
+                        className={`act-btn ${iLiked ? "liked" : ""}`}
+                        type="button"
+                        aria-label={iLiked ? "Unlike" : "Like"}
+                        onClick={() => toggleLike(p.id)}
+                      >
+                        <span className="act-icon" aria-hidden="true">
+                          {iLiked ? "❤" : "♡"}
+                        </span>
+                        <span className="act-label">
+                          {likeCount > 0 ? likeCount : "Like"}
+                        </span>
+                      </button>
+                    </div>
+
+                    {text && (
+                      <div className="post-caption">
+                        <p className={`caption-text ${isExpanded ? "expanded" : ""}`}>
+                          {text}
+                        </p>
+                        {text.length > 220 && (
+                          <button
+                            type="button"
+                            className="caption-toggle"
+                            onClick={() => toggleExpand(p.id)}
+                          >
+                            {isExpanded ? "Show less" : "Read more"}
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

@@ -278,6 +278,140 @@
   padding: 12px 14px;
 }
 
+/* ===========================
+   JOURNEY — diary UI
+   =========================== */
+
+.pf-journey-wrap {
+  display: grid;
+  gap: 14px;
+}
+
+.pf-journey-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #222;
+}
+
+/* Composer */
+.pf-journey-form {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+  display: grid;
+  gap: 10px;
+}
+
+.pf-journey-input {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  outline: none;
+}
+.pf-journey-input:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100,108,255,.15);
+}
+
+.pf-journey-textarea {
+  min-height: 120px;
+  padding: 10px 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  outline: none;
+  resize: vertical;
+}
+.pf-journey-textarea:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100,108,255,.15);
+}
+
+.pf-journey-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pf-journey-save {
+  appearance: none;
+  border: none;
+  background: linear-gradient(180deg, #6b7cff, #5566ff);
+  color: #fff;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(85, 102, 255, 0.25);
+}
+
+/* List */
+.pf-journey-list {
+  display: grid;
+  gap: 12px;
+}
+
+.pf-journey-card {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+}
+
+.pf-journey-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.pf-journey-titleline {
+  display: grid;
+  gap: 2px;
+}
+
+.pf-journey-card-title {
+  font-weight: 800;
+  color: #111;
+}
+
+.pf-journey-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.pf-journey-delete {
+  appearance: none;
+  border: 1px solid #e3e3e3;
+  background: #fafafa;
+  color: #444;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.pf-journey-delete:hover {
+  background: #ffeef0;
+  color: #8a0010;
+  border-color: #ffd0d5;
+  box-shadow: 0 0 0 3px rgba(255, 0, 0, .08);
+}
+
+.pf-journey-content {
+  color: #2b2f38;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
 /* Responsive tweak: stack header on small screens */
 @media (max-width: 640px) {
   .pf-saved-head {
