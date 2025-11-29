@@ -1,0 +1,63 @@
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(4px);
+  z-index: 2000;
+}
+
+/* Modal Container */
+.recipe-modal-content {
+  background: #ffffff;
+  padding: 28px;
+  width: min(700px, 90vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  border-radius: 16px;
+  position: relative;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+/* Close Button */
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: none;
+  background: #ff5c5c;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.modal-close:hover {
+  background: #e04848;
+}
+
+/* Recipe Image */
+.modal-image {
+  width: 100%;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  object-fit: cover;
+}
+
+/* Fade-in Animation */
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

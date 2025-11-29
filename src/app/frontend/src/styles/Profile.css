@@ -1,0 +1,424 @@
+/* src/styles/Profile.css */
+.pf-container {
+  background: #f0f0f0;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+.pf-shell {
+  margin-top: 4rem; /* clear navbar */
+  width: min(1200px, 94vw);
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.25rem;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  width: 500px;
+  height: 300px;
+  text-align: center;
+}
+
+.pf-textarea {
+  margin: 0 auto;
+  height: 4rem;
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #fff;
+  color: #000;
+}
+
+.pf-file-input {
+  margin: 1rem 0;
+}
+
+/* LEFT CARD */
+.pf-left {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.pf-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #eaeaea, #d9d9d9);
+  border: 1px solid #d0d0d0;
+  margin: 6px auto 12px;
+}
+.pf-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  text-align: left;
+  margin-bottom: 6px;
+}
+.pf-bio {
+  color: #555;
+  line-height: 1.35;
+  margin-bottom: 14px;
+}
+.pf-menu {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 6px;
+}
+.pf-menu-btn {
+  background: white;
+  border: 1px solid #e2e2e2;
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.12s ease, box-shadow 0.12s ease;
+}
+.pf-menu-btn:hover {
+  border-color: #d4d4d4;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06);
+}
+
+/* RIGHT SIDE */
+.pf-right {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-tabs {
+  display: flex;
+  gap: 1.25rem;
+  padding: 14px 16px 0 16px;
+  border-bottom: 1px solid #e6e6e6;
+}
+.pf-tab {
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 10px 2px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #333;
+}
+.pf-tab.active {
+  color: #000;
+}
+.pf-tab.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  background: #646cff; /* brand accent */
+  border-radius: 3px 3px 0 0;
+}
+
+.pf-content {
+  padding: 18px;
+  min-height: 360px;
+  display: grid;
+}
+.pf-content-placeholder {
+  background: white;
+  border: 1px dashed #cfcfcf;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  color: #666;
+}
+
+/* ===========================
+   SAVED RECIPES — UI POLISH
+   =========================== */
+
+.pf-saved-wrap {
+  display: grid;
+  gap: 14px;
+}
+
+/* Header (title + search) */
+.pf-saved-head {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 12px;
+  align-items: center;
+}
+
+.pf-saved-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #222;
+}
+
+.pf-saved-search {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  outline: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.pf-saved-search:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100,108,255,.15);
+}
+
+/* Grid */
+.pf-saved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+/* Card */
+.pf-saved-card {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 140px auto;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+  transition: transform .08s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.pf-saved-card:hover {
+  transform: translateY(-2px);
+  border-color: #dcdcfb;
+  box-shadow: 0 6px 18px rgba(100,108,255,.12);
+}
+
+/* Image */
+.pf-saved-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #f3f3f3;
+}
+
+/* Body row (name + remove) */
+.pf-saved-body {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  padding: 10px 12px;
+  gap: 10px;
+}
+
+.pf-saved-name {
+  display: -webkit-box;          
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  -webkit-line-clamp: 2;  
+  line-clamp: 2;          
+}
+
+/* Remove button */
+.pf-saved-remove {
+  appearance: none;
+  border: 1px solid #e3e3e3;
+  background: #fafafa;
+  color: #444;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.pf-saved-remove:hover {
+  background: #ffeef0;
+  color: #8a0010;
+  border-color: #ffd0d5;
+  box-shadow: 0 0 0 3px rgba(255, 0, 0, .08);
+}
+
+/* Notes & errors within the tab */
+.pf-note {
+  color: #555;
+  background: #fff;
+  border: 1px dashed #cfcfcf;
+  border-radius: 12px;
+  padding: 14px;
+  text-align: center;
+}
+.pf-error {
+  color: #9b1c1c;
+  background: #fde8e8;
+  border: 1px solid #f8b4b4;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+/* ===========================
+   JOURNEY — diary UI
+   =========================== */
+
+.pf-journey-wrap {
+  display: grid;
+  gap: 14px;
+}
+
+.pf-journey-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #222;
+}
+
+/* Composer */
+.pf-journey-form {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+  display: grid;
+  gap: 10px;
+}
+
+.pf-journey-input {
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  outline: none;
+}
+.pf-journey-input:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100,108,255,.15);
+}
+
+.pf-journey-textarea {
+  min-height: 120px;
+  padding: 10px 12px;
+  border: 1px solid #dcdcdc;
+  border-radius: 10px;
+  background: #fff;
+  color: #111;
+  outline: none;
+  resize: vertical;
+}
+.pf-journey-textarea:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100,108,255,.15);
+}
+
+.pf-journey-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pf-journey-save {
+  appearance: none;
+  border: none;
+  background: linear-gradient(180deg, #6b7cff, #5566ff);
+  color: #fff;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(85, 102, 255, 0.25);
+}
+
+/* List */
+.pf-journey-list {
+  display: grid;
+  gap: 12px;
+}
+
+.pf-journey-card {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 14px;
+  padding: 12px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.04);
+}
+
+.pf-journey-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.pf-journey-titleline {
+  display: grid;
+  gap: 2px;
+}
+
+.pf-journey-card-title {
+  font-weight: 800;
+  color: #111;
+}
+
+.pf-journey-date {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.pf-journey-delete {
+  appearance: none;
+  border: 1px solid #e3e3e3;
+  background: #fafafa;
+  color: #444;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+.pf-journey-delete:hover {
+  background: #ffeef0;
+  color: #8a0010;
+  border-color: #ffd0d5;
+  box-shadow: 0 0 0 3px rgba(255, 0, 0, .08);
+}
+
+.pf-journey-content {
+  color: #2b2f38;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+/* Responsive tweak: stack header on small screens */
+@media (max-width: 640px) {
+  .pf-saved-head {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .pf-saved-search {
+    width: 100%;
+  }
+}

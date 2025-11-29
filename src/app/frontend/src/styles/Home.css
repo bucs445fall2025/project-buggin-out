@@ -1,0 +1,77 @@
+/* --- Base Container & Background --- */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 4rem 1rem;
+  text-align: center;
+  background-color: #f0f0f0;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+}
+
+.container::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url(../assets/background.jpg);
+  background-size: cover;
+  background-position: center;
+  opacity: 0.35;
+  z-index: -1;
+}
+
+.splash {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(10px);
+  border-radius: 1.5rem;
+  padding: 3rem 2rem;
+  width: min(800px, 90%);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+.splash h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.splash p {
+  font-size: 1.25rem;
+  margin: 0.7rem 0;
+  color: #444;
+}
+
+/* Modern buttons instead of plain text links */
+.splash a {
+  color: white;
+  background-color: #7fa3f0;
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.7rem;
+  font-weight: bold;
+  text-decoration: none;
+  margin: 0 0.4rem;
+  transition: background 0.2s ease-in-out;
+}
+
+.splash a:hover {
+  background-color: #7fa3f0;
+}
+
+/* Simple fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
