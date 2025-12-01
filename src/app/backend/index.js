@@ -17,7 +17,13 @@ const upload = multer({
   storage: multer.diskStorage({
     destination: (req, file, cb) => cb(null, "uploads/"),
     filename: (req, file, cb) =>
-      cb(null, Date.now() + "_" + Math.round(Math.random() * 1e9) + path.extname(file.originalname)),
+      cb(
+        null,
+        Date.now() +
+          "_" +
+          Math.round(Math.random() * 1e9) +
+          path.extname(file.originalname)
+      ),
   }),
 });
 
@@ -28,7 +34,9 @@ const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_change_me";
 
 // === Auth helpers
 function signToken(user) {
-  return jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ sub: user.id, email: user.email }, JWT_SECRET, {
+    expiresIn: "7d",
+  });
 }
 function requireAuth(req, res, next) {
   const h = req.headers.authorization || "";
@@ -77,7 +85,11 @@ app.get("/", async (req, res) => {
     const response = await axios.get(url);
     res.json(response.data);
   } catch (error) {
-    console.error("Error fetching data:", error.response?.data || error.message, error.config?.url);
+    console.error(
+      "Error fetching data:",
+      error.response?.data || error.message,
+      error.config?.url
+    );
     res.status(500).json({ error: "Failed to fetch from Spoonacular" });
   }
 });
@@ -86,7 +98,8 @@ app.get("/", async (req, res) => {
 
 app.post("/api/auth/signup", async (req, res) => {
   const { email, password, displayName = "" } = req.body || {};
-  if (!email || !password) return res.status(400).json({ error: "email and password required" });
+  if (!email || !password)
+    return res.status(400).json({ error: "email and password required" });
 
   try {
     const hash = await bcrypt.hash(password, 10);
@@ -105,7 +118,8 @@ app.post("/api/auth/signup", async (req, res) => {
       profile: user.profile,
     });
   } catch (e) {
-    if (e.code === "P2002") return res.status(409).json({ error: "Email already registered" });
+    if (e.code === "P2002")
+      return res.status(409).json({ error: "Email already registered" });
     console.error("Signup error:", e);
     res.status(500).json({ error: "Signup failed" });
   }
@@ -113,7 +127,8 @@ app.post("/api/auth/signup", async (req, res) => {
 
 app.post("/api/auth/login", async (req, res) => {
   const { email, password } = req.body || {};
-  if (!email || !password) return res.status(400).json({ error: "email and password required" });
+  if (!email || !password)
+    return res.status(400).json({ error: "email and password required" });
 
   try {
     const user = await prisma.user.findUnique({ where: { email } });
@@ -141,7 +156,9 @@ app.get("/api/me", requireAuth, async (req, res) => {
 });
 
 app.get("/api/profile", requireAuth, async (req, res) => {
-  const profile = await prisma.profile.findUnique({ where: { userId: req.user.sub } });
+  const profile = await prisma.profile.findUnique({
+    where: { userId: req.user.sub },
+  });
   res.json(profile);
 });
 
@@ -161,7 +178,12 @@ app.get("/api/recipes/search", async (req, res) => {
   try {
     const { query = "pasta", number = 10 } = req.query;
     const { data } = await spoon.get("/recipes/complexSearch", {
-      params: { query, number, addRecipeInformation: true, addRecipeNutrition: true },
+      params: {
+        query,
+        number,
+        addRecipeInformation: true,
+        addRecipeNutrition: true,
+      },
     });
     res.json(data);
   } catch (error) {
@@ -176,10 +198,15 @@ app.get("/api/recipes/search", async (req, res) => {
 app.get("/api/recipes/random", async (req, res) => {
   try {
     const { number = 6, includeNutrition = true } = req.query;
-    const { data } = await spoon.get("/recipes/random", { params: { number, includeNutrition } });
+    const { data } = await spoon.get("/recipes/random", {
+      params: { number, includeNutrition },
+    });
     res.json(data);
   } catch (error) {
-    console.error("Random recipe route error:", error.response?.data || error.message);
+    console.error(
+      "Random recipe route error:",
+      error.response?.data || error.message
+    );
     res.status(error.response?.status || 500).json({
       error: "Failed to fetch random recipes from Spoonacular",
       details: error.response?.data || error.message,
@@ -190,7 +217,9 @@ app.get("/api/recipes/random", async (req, res) => {
 app.get("/api/recipes/:id/macros", async (req, res) => {
   try {
     const { id } = req.params;
-    const { data } = await spoon.get(`/recipes/${id}/information`, { params: { includeNutrition: true } });
+    const { data } = await spoon.get(`/recipes/${id}/information`, {
+      params: { includeNutrition: true },
+    });
     const nutrients = data?.nutrition?.nutrients || [];
     const get = (name) => nutrients.find((n) => n.name === name)?.amount || 0;
 
@@ -213,7 +242,9 @@ app.get("/api/recipes/:id/macros", async (req, res) => {
 app.get("/api/recipes/:id/ingredients", async (req, res) => {
   try {
     const { id } = req.params;
-    const { data } = await spoon.get(`/recipes/${id}/information`, { params: { includeNutrition: false } });
+    const { data } = await spoon.get(`/recipes/${id}/information`, {
+      params: { includeNutrition: false },
+    });
     const ingredients =
       data?.extendedIngredients?.map((ing) => ({
         id: ing.id,
@@ -224,7 +255,10 @@ app.get("/api/recipes/:id/ingredients", async (req, res) => {
 
     res.json({ id, title: data.title, ingredients });
   } catch (error) {
-    console.error("Ingredients route error:", error.response?.data || error.message);
+    console.error(
+      "Ingredients route error:",
+      error.response?.data || error.message
+    );
     res.status(error.response?.status || 500).json({
       error: "Failed to fetch ingredients",
       details: error.response?.data || error.message,
@@ -245,7 +279,9 @@ app.get("/api/recipes/themealdb/details/:id", async (req, res) => {
       .map((_, i) => {
         const ing = meal[`strIngredient${i + 1}`];
         const measure = meal[`strMeasure${i + 1}`];
-        return ing && ing.trim() ? { ingredient: ing, measure: measure?.trim() } : null;
+        return ing && ing.trim()
+          ? { ingredient: ing, measure: measure?.trim() }
+          : null;
       })
       .filter(Boolean);
 
@@ -296,14 +332,19 @@ app.get("/api/recipes/themealdb/random_3", async (req, res) => {
     res.json(mappedMeals);
   } catch (error) {
     console.error("TheMealDB Random 3 route error:", error);
-    res.status(500).json({ error: "Failed to fetch random meals from TheMealDB" });
+    res
+      .status(500)
+      .json({ error: "Failed to fetch random meals from TheMealDB" });
   }
 });
 
 app.get("/api/recipes/themealdb/search", async (req, res) => {
   try {
     const { query, filterType } = req.query;
-    if (!query || !filterType) return res.status(400).json({ error: "Query and filterType are required." });
+    if (!query || !filterType)
+      return res
+        .status(400)
+        .json({ error: "Query and filterType are required." });
 
     let endpoint = "/filter.php";
     let params = {};
@@ -328,7 +369,9 @@ app.get("/api/recipes/themealdb/search", async (req, res) => {
     res.json(mappedMeals);
   } catch (error) {
     console.error("TheMealDB Search route error:", error);
-    res.status(500).json({ error: "Failed to fetch search results from TheMealDB" });
+    res
+      .status(500)
+      .json({ error: "Failed to fetch search results from TheMealDB" });
   }
 });
 
@@ -336,13 +379,15 @@ app.get("/api/recipes/themealdb/search", async (req, res) => {
 
 app.post("/api/recipes/save", requireAuth, async (req, res) => {
   const { recipeId } = req.body;
-  if (!recipeId) return res.status(400).json({ error: "Recipe ID is required" });
+  if (!recipeId)
+    return res.status(400).json({ error: "Recipe ID is required" });
 
   try {
     const existing = await prisma.savedRecipe.findFirst({
       where: { userId: req.user.sub, recipeId },
     });
-    if (existing) return res.status(409).json({ error: "Recipe already saved" });
+    if (existing)
+      return res.status(409).json({ error: "Recipe already saved" });
 
     const saved = await prisma.savedRecipe.create({
       data: { userId: req.user.sub, recipeId },
@@ -367,7 +412,9 @@ app.get("/api/recipes/saved", requireAuth, async (req, res) => {
     const results = [];
     for (const { recipeId } of saved) {
       try {
-        const { data } = await mealdb.get("/lookup.php", { params: { i: recipeId } });
+        const { data } = await mealdb.get("/lookup.php", {
+          params: { i: recipeId },
+        });
         const meal = data.meals?.[0];
         if (!meal) continue;
 
@@ -376,7 +423,10 @@ app.get("/api/recipes/saved", requireAuth, async (req, res) => {
             const name = meal[`strIngredient${i + 1}`];
             const measure = meal[`strMeasure${i + 1}`];
             if (name && name.trim()) {
-              return { name: name.trim(), measure: measure ? measure.trim() : "" };
+              return {
+                name: name.trim(),
+                measure: measure ? measure.trim() : "",
+              };
             }
             return null;
           })
@@ -419,7 +469,9 @@ app.post("/api/recipes/unsave", requireAuth, async (req, res) => {
   if (!recipeId) return res.status(400).json({ error: "recipeId required" });
 
   try {
-    await prisma.savedRecipe.deleteMany({ where: { userId: req.user.sub, recipeId: String(recipeId) } });
+    await prisma.savedRecipe.deleteMany({
+      where: { userId: req.user.sub, recipeId: String(recipeId) },
+    });
     res.json({ ok: true });
   } catch (err) {
     console.error("unsave error:", err);
@@ -430,7 +482,9 @@ app.post("/api/recipes/unsave", requireAuth, async (req, res) => {
 app.delete("/api/recipes/saved/:recipeId", requireAuth, async (req, res) => {
   try {
     const recipeId = String(req.params.recipeId);
-    const result = await prisma.savedRecipe.deleteMany({ where: { userId: req.user.sub, recipeId } });
+    const result = await prisma.savedRecipe.deleteMany({
+      where: { userId: req.user.sub, recipeId },
+    });
     return res.json({ ok: true, deleted: result.count });
   } catch (err) {
     console.error("Delete saved recipe error:", err);
@@ -469,27 +523,35 @@ app.get("/api/posts", async (req, res) => {
 });
 
 // CREATE post (supports image upload)
-app.post("/api/posts", requireAuth, upload.single("image"), async (req, res) => {
-  try {
-    const { content } = req.body;
-    if (!content && !req.file) return res.status(400).json({ error: "Post must contain text or image" });
+app.post(
+  "/api/posts",
+  requireAuth,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      const { content } = req.body;
+      if (!content && !req.file)
+        return res
+          .status(400)
+          .json({ error: "Post must contain text or image" });
 
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+      const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-    const post = await prisma.post.create({
-      data: {
-        content: content || "",
-        imageUrl,
-        userId: req.user.sub,
-      },
-    });
+      const post = await prisma.post.create({
+        data: {
+          content: content || "",
+          imageUrl,
+          userId: req.user.sub,
+        },
+      });
 
-    res.status(201).json(post);
-  } catch (err) {
-    console.error("Create post error:", err);
-    res.status(500).json({ error: "Failed to create post111" });
+      res.status(201).json(post);
+    } catch (err) {
+      console.error("Create post error:", err);
+      res.status(500).json({ error: "Failed to create post111" });
+    }
   }
-});
+);
 
 // TOGGLE like/unlike — returns { liked, likes }
 app.post("/api/posts/:id/like", requireAuth, async (req, res) => {
@@ -497,7 +559,9 @@ app.post("/api/posts/:id/like", requireAuth, async (req, res) => {
     const postId = Number(req.params.id);
     const userId = req.user.sub;
 
-    const existing = await prisma.postLike.findFirst({ where: { postId, userId } });
+    const existing = await prisma.postLike.findFirst({
+      where: { postId, userId },
+    });
 
     if (existing) {
       // UNLIKE
@@ -547,14 +611,20 @@ app.get("/api/posts/mine", requireAuth, async (req, res) => {
 app.delete("/api/posts/:id", requireAuth, async (req, res) => {
   try {
     const id = Number(req.params.id);
-    if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid post id" });
+    if (Number.isNaN(id))
+      return res.status(400).json({ error: "Invalid post id" });
 
     const post = await prisma.post.findUnique({ where: { id } });
     if (!post) return res.status(404).json({ error: "Post not found" });
-    if (post.userId !== req.user.sub) return res.status(403).json({ error: "Not allowed" });
+    if (post.userId !== req.user.sub)
+      return res.status(403).json({ error: "Not allowed" });
 
     if (post.imageUrl && post.imageUrl.startsWith("/uploads/")) {
-      const abs = path.join(process.cwd(), "uploads", path.basename(post.imageUrl));
+      const abs = path.join(
+        process.cwd(),
+        "uploads",
+        path.basename(post.imageUrl)
+      );
       fs.unlink(abs, () => {}); // best-effort
     }
 
@@ -621,7 +691,6 @@ app.delete("/api/journey/:id", requireAuth, async (req, res) => {
     res.status(500).json({ error: "Failed to delete entry" });
   }
 });
-
 
 // ---------------------- Start server ----------------------
 app.listen(port, () => {

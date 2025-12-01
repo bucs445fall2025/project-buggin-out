@@ -51,8 +51,8 @@ hr {
 }
 
 /* ====================================================================
-   FILTER UI CARD
-   ==================================================================== */
+     FILTER UI CARD
+     ==================================================================== */
 
 .filter-ui-card {
   background-color: #ffffff; /* White background for contrast */
@@ -103,16 +103,16 @@ hr {
 
 .input-group input:focus,
 .input-group select:focus {
-  border-color: #ff6b6b;
+  border-color: #7fa3f0;
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.2);
+  box-shadow: 0 0 0 3px rgba(107, 216, 255, 0.2);
 }
 
 .search-form button {
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 0.5rem;
-  background-color: #ff6b6b; /* Accent color */
+  background-color: #7fa3f0; /* Accent color */
   color: white;
   font-weight: bold;
   cursor: pointer;
@@ -121,7 +121,7 @@ hr {
 }
 
 .search-form button:hover:not(:disabled) {
-  background-color: #e65252;
+  background-color: #7fa3f0;
   transform: translateY(-1px);
 }
 
@@ -131,8 +131,8 @@ hr {
 }
 
 /* ====================================================================
-   RECIPE GRID & CARDS
-   ==================================================================== */
+     RECIPE GRID & CARDS
+     ==================================================================== */
 
 .recipes-container {
   display: grid;
@@ -209,13 +209,13 @@ hr {
 }
 
 .add-recipe-button {
-  background-color: #ff6b6b;
+  background-color: #7fa3f0;
   color: white;
-  border: 1px solid #ff6b6b;
+  border: 1px solid #7fa3f0;
 }
 
 .add-recipe-button:hover:not(:disabled) {
-  background-color: #e65252;
+  background-color: #7fa3f0;
 }
 
 .add-recipe-button:disabled {
@@ -226,8 +226,8 @@ hr {
 }
 
 /* ====================================================================
-   MEDIA QUERIES (for better mobile responsiveness)
-   ==================================================================== */
+     MEDIA QUERIES (for better mobile responsiveness)
+     ==================================================================== */
 
 @media (max-width: 600px) {
   .rec-container {
