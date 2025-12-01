@@ -1,0 +1,282 @@
+/* ========================================
+   Upload Recipe — Matches Posts.css Exactly
+========================================= */
+
+/* Page shell matches .posts-page */
+.posts-page {
+  padding: 92px 16px 40px;
+  background: radial-gradient(
+      1200px 600px at -10% -10%,
+      #e9f0ff 0,
+      rgba(233, 240, 255, 0) 40%
+    ),
+    radial-gradient(
+      900px 500px at 110% -20%,
+      #ffeef4 0,
+      rgba(255, 238, 244, 0) 38%
+    ),
+    #f6f7fb;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+/* feed layout */
+.feed-shell {
+  width: min(900px, 100%);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+.feed-left {
+  display: grid;
+  gap: 16px;
+}
+
+/* ========================================
+     Composer Card (Upload Recipe Card)
+  ========================================= */
+
+.composer-card {
+  background: #ffffffcc;
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(16, 24, 40, 0.06);
+  box-shadow: 0 6px 24px rgba(17, 24, 39, 0.06);
+  border-radius: 16px;
+  padding: 12px 14px;
+}
+
+.composer-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 2px 2px;
+}
+
+.composer-title {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.composer-sub {
+  color: #6b7280;
+  font-size: 13px;
+}
+
+/* ========================================
+     Form Layout
+  ========================================= */
+
+.composer-form {
+  margin-top: 6px;
+  display: grid;
+  gap: 12px;
+}
+
+/* ========================================
+     Inputs
+  ========================================= */
+
+.composer-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #e6e9ef;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+  background: #fff;
+  color: #111 !important;
+  caret-color: #111 !important;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.composer-input::placeholder {
+  color: #9aa0a6;
+}
+
+.composer-input:focus {
+  border-color: #6b7cff;
+  box-shadow: 0 0 0 4px rgba(107, 124, 255, 0.15);
+}
+
+/* ========================================
+     Ingredients Section
+  ========================================= */
+
+.ingredients-section {
+  margin-top: 12px;
+}
+
+.ingredients-section h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.ingredient-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.ingredient-input {
+  flex: 1;
+}
+
+.add-ingredient {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.add-ingredient:hover {
+  background: #e5e7eb;
+  border-color: #cbd5e1;
+}
+
+.remove-ingredient {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.remove-ingredient:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+/* ========================================
+     Textarea
+  ========================================= */
+
+.composer-textarea {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #e6e9ef;
+  font-size: 14px;
+  box-sizing: border-box;
+  outline: none;
+  background: #fff;
+  color: #111 !important;
+  caret-color: #111 !important;
+}
+
+.composer-textarea::placeholder {
+  color: #9aa0a6;
+}
+
+.composer-textarea:focus {
+  border-color: #6b7cff;
+  box-shadow: 0 0 0 4px rgba(107, 124, 255, 0.15);
+}
+
+/* ========================================
+     File Upload
+  ========================================= */
+
+.composer-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.file-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.7rem;
+  border-radius: 12px;
+  border: 1px dashed #cfd5e3;
+  background: #fafcff;
+  cursor: pointer;
+  flex: 1;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-cta {
+  font-size: 13px;
+  color: #0a66c2;
+  font-weight: 700;
+}
+
+.file-name {
+  margin-left: auto;
+  font-size: 13px;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 45%;
+}
+
+/* ========================================
+     Post Button
+  ========================================= */
+
+.btn-post {
+  background: linear-gradient(180deg, #6b7cff, #5566ff);
+  color: white;
+  border: none;
+  padding: 0.6rem 1rem;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(85, 102, 255, 0.25);
+  transition: transform 0.06s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-post:hover {
+  transform: translateY(-1px);
+}
+
+.btn-post[disabled],
+.btn-post[aria-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ========================================
+     Form Error
+  ========================================= */
+
+.form-error {
+  margin-top: 8px;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+/* ========================================
+     Responsive
+  ========================================= */
+
+@media (max-width: 520px) {
+  .file-name {
+    max-width: 35%;
+  }
+}

@@ -5,11 +5,12 @@ import Recipes from "./pages/Recipes";
 import MacroTracker from "./pages/MacroTracker";
 import Profile from "./pages/Profile";
 import SignUp from "./pages/SignUp";
-import Grocery from "./pages/Grocery"
+import Grocery from "./pages/Grocery";
 import Login from "./pages/Login";
 import AccountSetup from "./pages/AccountSetup";
 import NavBar from "./components/NavBar";
 import Posts from "./pages/Posts";
+import UploadRecipe from "./pages/UploadRecipe";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/grocery" element={<Grocery />} />
         <Route path="/posts" element={<Posts />} />
+        <Route path="/upload" element={<UploadRecipe />} />
       </Routes>
     </>
   );
