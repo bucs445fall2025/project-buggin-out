@@ -40,17 +40,13 @@ export default function Profile() {
   const [entryText, setEntryText] = useState("");
 
   // Modal open/close
-  const openModal = () => setIsModalOpen(true);
+  const openModal = () => {
+    // Set the modal's editing state to the current profile data
+    setProfileDescription(bio);
+    setAvatarPreview(avatar);
+    setIsModalOpen(true);
+  };
   const closeModal = () => setIsModalOpen(false);
-
-  // Local bio/avatar on mount
-  useEffect(() => {
-    setBio(
-      localStorage.getItem("profile.bio") ||
-        "Bio goes here. Keep it short—what you’re about, goals, or favorite meals."
-    );
-    setAvatar(localStorage.getItem("profile.avatarDataUrl") || "");
-  }, []);
 
   // Load display name from backend
   useEffect(() => {
@@ -67,11 +63,28 @@ export default function Profile() {
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || "Failed to load profile.");
 
-        const nameFromProfile = data?.profile?.displayName?.trim();
+        const profile = data.profile || {}; // Added safety
+
+        const nameFromProfile = profile.displayName?.trim();
         const fallbackFromEmail =
           (data?.email && String(data.email).split("@")[0]) || null;
+        const finalDisplayName = nameFromProfile || fallbackFromEmail || "User";
 
-        setDisplayName(nameFromProfile || fallbackFromEmail || "User");
+        setDisplayName(finalDisplayName);
+
+        // Use backend data for bio and avatar, set placeholders if null
+        setBio(
+          profile.bio ||
+            "Bio goes here. Keep it short—what you’re about, goals, or favorite meals."
+        );
+        setAvatar(profile.avatarUrl || "");
+
+        // Set the edit modal's description state to the current bio
+        setProfileDescription(profile.bio || "");
+
+        // Set the edit modal's avatar preview state to the current avatar
+        setAvatarPreview(profile.avatarUrl || "");
+        // ---------------------------------
       } catch {
         setDisplayName("User");
       }
