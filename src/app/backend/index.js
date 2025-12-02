@@ -529,16 +529,43 @@ app.post(
   upload.single("image"),
   async (req, res) => {
     try {
-      const { content } = req.body;
-      if (!content && !req.file)
-        return res
-          .status(400)
-          .json({ error: "Post must contain text or image" });
+      const { title, category, area, ingredients, instructions, content } =
+        req.body;
+
+      // Required fields
+      if (!title || !category || !area || !ingredients || !instructions) {
+        return res.status(400).json({
+          error:
+            "Title, category, area, ingredients, and instructions are required",
+        });
+      }
+
+      // Parse ingredients (may arrive as JSON string)
+      let parsedIngredients;
+      try {
+        parsedIngredients =
+          typeof ingredients === "string"
+            ? JSON.parse(ingredients)
+            : ingredients;
+
+        if (!Array.isArray(parsedIngredients)) {
+          return res.status(400).json({
+            error: "Ingredients must be an array of { name, measure }",
+          });
+        }
+      } catch (err) {
+        return res.status(400).json({ error: "Invalid ingredients format" });
+      }
 
       const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
       const post = await prisma.post.create({
         data: {
+          title,
+          category,
+          area,
+          ingredients: parsedIngredients,
+          instructions,
           content: content || "",
           imageUrl,
           userId: req.user.sub,
@@ -548,7 +575,7 @@ app.post(
       res.status(201).json(post);
     } catch (err) {
       console.error("Create post error:", err);
-      res.status(500).json({ error: "Failed to create post111" });
+      res.status(500).json({ error: "Failed to create post" });
     }
   }
 );
@@ -600,6 +627,7 @@ app.get("/api/posts/mine", requireAuth, async (req, res) => {
       },
       orderBy: { createdAt: "desc" },
     });
+
     res.json(posts);
   } catch (err) {
     console.error("Fetch my posts error:", err);

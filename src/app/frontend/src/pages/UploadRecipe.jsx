@@ -15,18 +15,67 @@ export default function UploadRecipe() {
   const [instructions, setInstructions] = useState("");
   const [content, setContent] = useState("");
   const [file, setFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
+
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
+  /* ==========================================
+     INGREDIENT HANDLERS
+  ========================================== */
   const addIngredient = () =>
     setIngredients((prev) => [...prev, { name: "", measure: "" }]);
+
   const removeIngredient = (idx) =>
     setIngredients((prev) => prev.filter((_, i) => i !== idx));
+
   const updateIngredient = (idx, field, value) =>
     setIngredients((prev) =>
       prev.map((ing, i) => (i === idx ? { ...ing, [field]: value } : ing))
     );
 
+  /* ==========================================
+     FILE & DRAG/DROP HANDLING
+  ========================================== */
+  const handleFile = (f) => {
+    if (!f) return;
+
+    setFile(f);
+    setPreviewUrl(URL.createObjectURL(f));
+  };
+
+  const handleChangeFile = (e) => {
+    const f = e.target.files?.[0];
+    handleFile(f);
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+
+    const f = e.dataTransfer.files?.[0];
+    handleFile(f);
+  };
+
+  /* ==========================================
+     SUBMIT
+  ========================================== */
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -64,7 +113,6 @@ export default function UploadRecipe() {
       const created = await res.json();
       if (!res.ok) throw new Error(created.error || "Failed to create post");
 
-      // redirect user back to feed
       window.location.href = "/posts";
     } catch (err) {
       setError(err.message);
@@ -72,6 +120,10 @@ export default function UploadRecipe() {
       setSubmitting(false);
     }
   };
+
+  /* ==========================================
+     RENDER
+  ========================================== */
 
   return (
     <div className="posts-page">
@@ -90,21 +142,25 @@ export default function UploadRecipe() {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Title"
               />
+
               <input
                 className="composer-input"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                placeholder="Category"
+                placeholder="Category (e.g., Beef, Dessert)"
               />
+
               <input
                 className="composer-input"
                 value={area}
                 onChange={(e) => setArea(e.target.value)}
-                placeholder="Area"
+                placeholder="Area (e.g., Italian, Mexican)"
               />
 
+              {/* INGREDIENTS */}
               <div className="ingredients-section">
                 <h4>Ingredients</h4>
+
                 {ingredients.map((ing, i) => (
                   <div className="ingredient-row" key={i}>
                     <input
@@ -115,6 +171,7 @@ export default function UploadRecipe() {
                       }
                       placeholder="Ingredient"
                     />
+
                     <input
                       className="composer-input ingredient-input"
                       value={ing.measure}
@@ -123,6 +180,7 @@ export default function UploadRecipe() {
                       }
                       placeholder="Measure"
                     />
+
                     <button
                       type="button"
                       className="remove-ingredient"
@@ -132,6 +190,7 @@ export default function UploadRecipe() {
                     </button>
                   </div>
                 ))}
+
                 <button
                   type="button"
                   className="add-ingredient"
@@ -141,6 +200,7 @@ export default function UploadRecipe() {
                 </button>
               </div>
 
+              {/* INSTRUCTIONS */}
               <textarea
                 className="composer-textarea"
                 rows={4}
@@ -149,15 +209,23 @@ export default function UploadRecipe() {
                 onChange={(e) => setInstructions(e.target.value)}
               />
 
+              {/* FILE UPLOAD + DRAG/DROP */}
               <div className="composer-row">
-                <label className="file-label">
+                <label
+                  className={`file-label ${dragActive ? "drag-active" : ""}`}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                >
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setFile(e.target.files?.[0])}
+                    onChange={handleChangeFile}
                     className="file-input"
                   />
-                  <span className="file-cta">Upload image</span>
+
+                  <span className="file-cta">Upload Image</span>
                   <span className="file-name">
                     {file ? file.name : "No file selected"}
                   </span>
@@ -171,6 +239,25 @@ export default function UploadRecipe() {
                   {submitting ? "Posting…" : "Post"}
                 </button>
               </div>
+
+              {/* PREVIEW */}
+              {previewUrl && (
+                <div className="image-preview-container">
+                  <img
+                    src={previewUrl}
+                    alt="Preview"
+                    className="image-preview"
+                    style={{
+                      width: "500px",
+                      height: "500px",
+                      objectFit: "cover",
+                      borderRadius: "14px",
+                      border: "1px solid #e5e7eb",
+                      boxShadow: "0 4px 14px rgba(0, 0, 0, 0.06)",
+                    }}
+                  />
+                </div>
+              )}
 
               {error && <div className="form-error">{error}</div>}
             </form>

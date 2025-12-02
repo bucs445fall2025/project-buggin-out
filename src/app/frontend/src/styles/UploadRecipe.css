@@ -1,8 +1,7 @@
-/* ========================================
-   Upload Recipe — Matches Posts.css Exactly
-========================================= */
+/* ---------------------------------------------------
+   Page Layout (same as Posts.css)
+--------------------------------------------------- */
 
-/* Page shell matches .posts-page */
 .posts-page {
   padding: 92px 16px 40px;
   background: radial-gradient(
@@ -17,14 +16,11 @@
     ),
     #f6f7fb;
   min-height: 100vh;
-  box-sizing: border-box;
   display: flex;
   justify-content: center;
-  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", Arial, sans-serif;
+  font-family: Inter, system-ui, sans-serif;
 }
 
-/* feed layout */
 .feed-shell {
   width: min(900px, 100%);
   display: grid;
@@ -37,9 +33,9 @@
   gap: 16px;
 }
 
-/* ========================================
-     Composer Card (Upload Recipe Card)
-  ========================================= */
+/* ---------------------------------------------------
+   Composer Card
+--------------------------------------------------- */
 
 .composer-card {
   background: #ffffffcc;
@@ -60,6 +56,7 @@
 .composer-title {
   font-weight: 800;
   color: #0f172a;
+  font-size: 20px;
 }
 
 .composer-sub {
@@ -67,19 +64,15 @@
   font-size: 13px;
 }
 
-/* ========================================
-     Form Layout
-  ========================================= */
-
 .composer-form {
   margin-top: 6px;
   display: grid;
   gap: 12px;
 }
 
-/* ========================================
-     Inputs
-  ========================================= */
+/* ---------------------------------------------------
+   Inputs
+--------------------------------------------------- */
 
 .composer-input {
   width: 100%;
@@ -87,8 +80,6 @@
   border-radius: 12px;
   border: 1px solid #e6e9ef;
   font-size: 14px;
-  box-sizing: border-box;
-  outline: none;
   background: #fff;
   color: #111 !important;
   caret-color: #111 !important;
@@ -104,20 +95,37 @@
   box-shadow: 0 0 0 4px rgba(107, 124, 255, 0.15);
 }
 
-/* ========================================
-     Ingredients Section
-  ========================================= */
+.composer-textarea {
+  width: 100%;
+  min-height: 92px;
+  resize: vertical;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #e6e9ef;
+  font-size: 14px;
+  background: #fff;
+  color: #111 !important;
+  caret-color: #111 !important;
+}
+
+.composer-textarea:focus {
+  border-color: #6b7cff;
+  box-shadow: 0 0 0 4px rgba(107, 124, 255, 0.15);
+}
+
+/* ---------------------------------------------------
+   Ingredients
+--------------------------------------------------- */
 
 .ingredients-section {
   margin-top: 12px;
 }
 
 .ingredients-section h4 {
-  margin: 0;
+  margin: 0 0 8px;
   font-size: 15px;
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: 8px;
 }
 
 .ingredient-row {
@@ -140,12 +148,10 @@
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .add-ingredient:hover {
   background: #e5e7eb;
-  border-color: #cbd5e1;
 }
 
 .remove-ingredient {
@@ -157,62 +163,33 @@
   padding: 8px 12px;
   border-radius: 8px;
   cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 .remove-ingredient:hover {
   background: #fee2e2;
-  border-color: #fca5a5;
 }
 
-/* ========================================
-     Textarea
-  ========================================= */
-
-.composer-textarea {
-  width: 100%;
-  min-height: 92px;
-  resize: vertical;
-  padding: 10px 12px;
-  border-radius: 12px;
-  border: 1px solid #e6e9ef;
-  font-size: 14px;
-  box-sizing: border-box;
-  outline: none;
-  background: #fff;
-  color: #111 !important;
-  caret-color: #111 !important;
-}
-
-.composer-textarea::placeholder {
-  color: #9aa0a6;
-}
-
-.composer-textarea:focus {
-  border-color: #6b7cff;
-  box-shadow: 0 0 0 4px rgba(107, 124, 255, 0.15);
-}
-
-/* ========================================
-     File Upload
-  ========================================= */
-
-.composer-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
+/* ---------------------------------------------------
+   File Input + Drag & Drop
+--------------------------------------------------- */
 
 .file-label {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.5rem 0.7rem;
+  padding: 0.8rem 1rem;
   border-radius: 12px;
-  border: 1px dashed #cfd5e3;
+  border: 2px dashed #cfd5e3;
   background: #fafcff;
   cursor: pointer;
   flex: 1;
+  transition: border-color 0.2s, background 0.25s;
+}
+
+.file-label.drag-active {
+  background: #eef2ff;
+  border-color: #6b7cff;
+  box-shadow: 0 0 0 4px rgba(107, 124, 255, 0.15);
 }
 
 .file-input {
@@ -235,9 +212,33 @@
   max-width: 45%;
 }
 
-/* ========================================
-     Post Button
-  ========================================= */
+/* ---------------------------------------------------
+   Image Preview
+--------------------------------------------------- */
+
+.image-preview-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
+}
+
+.image-preview {
+  width: 500px;
+  height: 500px;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.image-preview.visible {
+  opacity: 1;
+}
+
+/* ---------------------------------------------------
+   Submit Button
+--------------------------------------------------- */
 
 .btn-post {
   background: linear-gradient(180deg, #6b7cff, #5566ff);
@@ -248,22 +249,21 @@
   font-weight: 700;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(85, 102, 255, 0.25);
-  transition: transform 0.06s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+  transition: transform 0.06s ease, opacity 0.2s;
 }
 
 .btn-post:hover {
   transform: translateY(-1px);
 }
 
-.btn-post[disabled],
-.btn-post[aria-disabled="true"] {
+.btn-post[disabled] {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* ========================================
-     Form Error
-  ========================================= */
+/* ---------------------------------------------------
+   Errors
+--------------------------------------------------- */
 
 .form-error {
   margin-top: 8px;
@@ -271,9 +271,9 @@
   font-size: 13px;
 }
 
-/* ========================================
-     Responsive
-  ========================================= */
+/* ---------------------------------------------------
+   Responsive
+--------------------------------------------------- */
 
 @media (max-width: 520px) {
   .file-name {

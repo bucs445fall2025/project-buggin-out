@@ -112,7 +112,23 @@ export default function Posts() {
               />
             )}
 
-            <p className="modal-body">{selectedPost.instructions}</p>
+            {selectedPost.ingredients && (
+              <div className="modal-section">
+                <h3>Ingredients</h3>
+                <ul className="ingredients-list">
+                  {selectedPost.ingredients.map((item, idx) => (
+                    <li key={idx}>
+                      {item.measure} {item.name}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <div className="modal-section">
+              <h3>Instructions</h3>
+              <p className="modal-body">{selectedPost.instructions}</p>
+            </div>
           </div>
         </div>
       )}

@@ -41,6 +41,7 @@
 }
 
 .create-post-btn {
+  margin: auto;
   background: #6b7cff;
   color: white;
   padding: 10px 16px;
@@ -148,22 +149,24 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.65);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 50;
+  backdrop-filter: blur(4px);
+  z-index: 2000;
 }
 
 .modal-content {
   background: #ffffff;
-  width: min(90%, 600px);
-  max-height: 85vh;
+  padding: 28px;
+  width: min(900px, 90vw);
+  height: 85vh;
   overflow-y: auto;
   border-radius: 16px;
-  padding: 24px;
   position: relative;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.25);
+  animation: modalFadeIn 0.25s ease-out;
 }
 
 .modal-close {
