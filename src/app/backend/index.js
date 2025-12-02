@@ -148,11 +148,38 @@ app.post("/api/auth/login", async (req, res) => {
 // === PROFILE ROUTES ==================================================
 
 app.get("/api/me", requireAuth, async (req, res) => {
-  const me = await prisma.user.findUnique({
-    where: { id: req.user.sub },
-    select: { id: true, email: true, profile: true },
-  });
-  res.json(me);
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.sub },
+      include: { profile: true },
+    });
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to load user" });
+  }
+});
+
+// === UPDATE PROFILE ============================================
+app.put("/api/profile", requireAuth, async (req, res) => {
+  try {
+    const userId = req.user.sub;
+    const { displayName, bio, avatarUrl } = req.body;
+
+    const updated = await prisma.profile.update({
+      where: { userId },
+      data: {
+        displayName: displayName ?? undefined,
+        bio: bio ?? undefined,
+        avatarUrl: avatarUrl ?? undefined,
+      },
+    });
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Profile update failed:", err);
+    res.status(500).json({ error: "Failed to update profile" });
+  }
 });
 
 app.get("/api/profile", requireAuth, async (req, res) => {

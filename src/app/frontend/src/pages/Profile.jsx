@@ -161,12 +161,36 @@ export default function Profile() {
   }, []);
 
   // Save profile (local-only)
-  const handleSubmit = () => {
-    localStorage.setItem("profile.bio", profileDescription);
-    localStorage.setItem("profile.avatarDataUrl", avatarPreview);
-    setBio(profileDescription);
-    setAvatar(avatarPreview);
-    closeModal();
+  const handleSubmit = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Not authenticated");
+
+      const res = await fetch(`${API_BASE}/api/profile`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          displayName,
+          bio: profileDescription,
+          avatarUrl: avatarPreview, // optional
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.error || "Profile update failed");
+
+      // Update local UI
+      setBio(data.bio);
+      setDisplayName(data.displayName);
+      setAvatar(data.avatarUrl);
+
+      closeModal();
+    } catch (err) {
+      alert(err.message);
+    }
   };
 
   // Avatar picker
@@ -405,7 +429,11 @@ export default function Profile() {
             Save Entry
           </button>
         </div>
-        {journeyError && <div className="pf-error" role="alert">{journeyError}</div>}
+        {journeyError && (
+          <div className="pf-error" role="alert">
+            {journeyError}
+          </div>
+        )}
       </form>
 
       {/* List */}
@@ -416,12 +444,16 @@ export default function Profile() {
       ) : (
         <div className="pf-journey-list">
           {journeyEntries.map((e) => {
-            const when = e.createdAt ? new Date(e.createdAt).toLocaleString() : "";
+            const when = e.createdAt
+              ? new Date(e.createdAt).toLocaleString()
+              : "";
             return (
               <article key={e.id} className="pf-journey-card">
                 <div className="pf-journey-head">
                   <div className="pf-journey-titleline">
-                    <div className="pf-journey-card-title">{e.title || "Untitled Entry"}</div>
+                    <div className="pf-journey-card-title">
+                      {e.title || "Untitled Entry"}
+                    </div>
                     <div className="pf-journey-date">{when}</div>
                   </div>
                   <button
@@ -480,13 +512,11 @@ export default function Profile() {
           </div>
 
           <section className="pf-content" role="tabpanel">
-            {active === "Saved Recipes" ? (
-              renderSavedTab()
-            ) : active === "Posts" ? (
-              renderPostsTab()
-            ) : (
-              renderJourneyTab()
-            )}
+            {active === "Saved Recipes"
+              ? renderSavedTab()
+              : active === "Posts"
+              ? renderPostsTab()
+              : renderJourneyTab()}
           </section>
         </main>
       </div>
@@ -496,6 +526,14 @@ export default function Profile() {
         <div className="modal">
           <div className="modal-content">
             <h2>Edit Profile</h2>
+
+            <input
+              className="pf-input"
+              type="text"
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              placeholder="Username"
+            />
 
             <textarea
               className="pf-textarea"
