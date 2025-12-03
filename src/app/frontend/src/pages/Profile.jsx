@@ -13,7 +13,7 @@ export default function Profile() {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Profile basics
-  const [displayName, setDisplayName] = useState("Loading…");
+  const [displayName, setDisplayName] = useState("Login to view");
   const [bio, setBio] = useState("");
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatar, setAvatar] = useState("");
@@ -360,7 +360,7 @@ export default function Profile() {
         />
       </div>
 
-      {loadingSaved && <div className="pf-note">Loading…</div>}
+      {loadingSaved && <div className="pf-note">Loading...</div>}
       {!loadingSaved && savedError && (
         <div className="pf-error" role="alert">
           {savedError}
@@ -394,7 +394,7 @@ export default function Profile() {
     <div className="pf-posts-wrap">
       <h3 className="pf-posts-title">Your Posts</h3>
 
-      {loadingPosts && <div className="pf-note">Loading…</div>}
+      {loadingPosts && <div className="pf-note">Loading...</div>}
       {!loadingPosts && postsError && (
         <div className="pf-error" role="alert">
           {postsError}
