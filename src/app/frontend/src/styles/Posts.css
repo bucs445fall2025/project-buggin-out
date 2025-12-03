@@ -71,7 +71,8 @@
   width: 100%;
   max-width: 90vw;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  /* FIX: Increased minmax from 280px to 350px for wider cards */
+  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
   gap: 24px;
 }
 

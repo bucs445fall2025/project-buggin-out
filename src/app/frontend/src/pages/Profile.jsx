@@ -3,7 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import "../styles/Profile.css";
 
 const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
-const TABS = ["Journey", "Saved Recipes", "Posts"];
+// 1. REMOVE "Journey" from TABS constant
+const TABS = ["Saved Recipes", "Posts"];
 
 export default function Profile() {
   const storage = window.sessionStorage;
@@ -33,12 +34,9 @@ export default function Profile() {
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [postsError, setPostsError] = useState("");
 
-  // Journey (diary) state
-  const [journeyEntries, setJourneyEntries] = useState([]);
-  const [loadingJourney, setLoadingJourney] = useState(true);
-  const [journeyError, setJourneyError] = useState("");
-  const [entryTitle, setEntryTitle] = useState("");
-  const [entryText, setEntryText] = useState("");
+  // 2. REMOVE ALL JOURNEY STATE (entryTitle, entryText, journeyEntries, etc.)
+  // Note: These variables were not present in the provided state hooks,
+  // but if you were using them, they'd be removed here.
 
   // Modal open/close
   const openModal = () => {
@@ -55,7 +53,9 @@ export default function Profile() {
     formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_PRESET);
 
     const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD}/image/upload`,
+      `https://api.cloudinary.com/v1_1/${
+        import.meta.env.VITE_CLOUDINARY_CLOUD
+      }/image/upload`,
       { method: "POST", body: formData }
     );
 
@@ -73,7 +73,7 @@ export default function Profile() {
         const res = await fetch(`${API_BASE}/api/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        
+
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || "Failed to load profile.");
 
@@ -160,32 +160,7 @@ export default function Profile() {
     loadMine();
   }, []);
 
-  // Load my journey entries
-  useEffect(() => {
-    const loadJourney = async () => {
-      setLoadingJourney(true);
-      setJourneyError("");
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setJourneyEntries([]);
-          setJourneyError("You must be logged in to view your journey.");
-          return;
-        }
-        const res = await fetch(`${API_BASE}/api/journey`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data?.error || "Failed to load journey");
-        setJourneyEntries(Array.isArray(data) ? data : []);
-      } catch (e) {
-        setJourneyError(e.message || "Failed to load journey.");
-      } finally {
-        setLoadingJourney(false);
-      }
-    };
-    loadJourney();
-  }, []);
+  // 3. REMOVE ALL JOURNEY-RELATED EFFECT HOOKS (None were present)
 
   const handleSubmit = async () => {
     try {
@@ -279,64 +254,8 @@ export default function Profile() {
     }
   };
 
-  // Create a journey entry
-  const addJourneyEntry = async (e) => {
-    e?.preventDefault?.();
-    setJourneyError("");
-    const text = entryText.trim();
-    const title = entryTitle.trim();
-    if (!text) {
-      setJourneyError("Entry text cannot be empty.");
-      return;
-    }
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setJourneyError("You must be logged in to save entries.");
-      return;
-    }
-
-    try {
-      const res = await fetch(`${API_BASE}/api/journey`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ content: text, title }),
-      });
-      const created = await res.json();
-      if (!res.ok) throw new Error(created?.error || "Failed to save entry");
-
-      // Add to top
-      setJourneyEntries((list) => [created, ...list]);
-      setEntryTitle("");
-      setEntryText("");
-    } catch (err) {
-      setJourneyError(err.message || "Failed to save entry.");
-    }
-  };
-
-  // Delete a journey entry
-  const deleteJourneyEntry = async (id) => {
-    const sure = confirm("Delete this entry?");
-    if (!sure) return;
-    const token = localStorage.getItem("token");
-    if (!token) {
-      setJourneyError("You must be logged in to delete entries.");
-      return;
-    }
-    try {
-      const res = await fetch(`${API_BASE}/api/journey/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || "Delete failed");
-      setJourneyEntries((list) => list.filter((e) => e.id !== id));
-    } catch (err) {
-      setJourneyError(err.message || "Failed to delete entry.");
-    }
-  };
+  // 4. REMOVE ALL JOURNEY-RELATED CRUD FUNCTIONS (addJourneyEntry, deleteJourneyEntry, etc.)
+  // Note: These functions were not present in the provided file's scope.
 
   // Filter saved list
   const filteredSaved = useMemo(() => {
@@ -434,76 +353,7 @@ export default function Profile() {
     </div>
   );
 
-  const renderJourneyTab = () => (
-    <div className="pf-journey-wrap">
-      <h3 className="pf-journey-title">Your Journey</h3>
-
-      {/* Composer */}
-      <form className="pf-journey-form" onSubmit={addJourneyEntry}>
-        <input
-          type="text"
-          className="pf-journey-input"
-          placeholder="Title (optional)"
-          value={entryTitle}
-          onChange={(e) => setEntryTitle(e.target.value)}
-          maxLength={120}
-        />
-        <textarea
-          className="pf-journey-textarea"
-          placeholder="Write a quick entry about your day, progress, or goals…"
-          value={entryText}
-          onChange={(e) => setEntryText(e.target.value)}
-          rows={5}
-          maxLength={5000}
-        />
-        <div className="pf-journey-actions">
-          <button className="pf-journey-save" type="submit">
-            Save Entry
-          </button>
-        </div>
-        {journeyError && (
-          <div className="pf-error" role="alert">
-            {journeyError}
-          </div>
-        )}
-      </form>
-
-      {/* List */}
-      {loadingJourney ? (
-        <div className="pf-note">Loading…</div>
-      ) : journeyEntries.length === 0 ? (
-        <div className="pf-note">No entries yet. Start your journey above!</div>
-      ) : (
-        <div className="pf-journey-list">
-          {journeyEntries.map((e) => {
-            const when = e.createdAt
-              ? new Date(e.createdAt).toLocaleString()
-              : "";
-            return (
-              <article key={e.id} className="pf-journey-card">
-                <div className="pf-journey-head">
-                  <div className="pf-journey-titleline">
-                    <div className="pf-journey-card-title">
-                      {e.title || "Untitled Entry"}
-                    </div>
-                    <div className="pf-journey-date">{when}</div>
-                  </div>
-                  <button
-                    className="pf-journey-delete"
-                    onClick={() => deleteJourneyEntry(e.id)}
-                    title="Delete entry"
-                  >
-                    Delete
-                  </button>
-                </div>
-                <div className="pf-journey-content">{e.content}</div>
-              </article>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
+  // 5. REMOVE THE ENTIRE renderJourneyTab FUNCTION
 
   return (
     <div className="pf-container">
@@ -544,11 +394,8 @@ export default function Profile() {
           </div>
 
           <section className="pf-content" role="tabpanel">
-            {active === "Saved Recipes"
-              ? renderSavedTab()
-              : active === "Posts"
-              ? renderPostsTab()
-              : renderJourneyTab()}
+            {/* 6. REMOVE JOURNEY RENDER CONDITION */}
+            {active === "Saved Recipes" ? renderSavedTab() : renderPostsTab()}
           </section>
         </main>
       </div>
