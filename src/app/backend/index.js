@@ -8,24 +8,14 @@ const axios = require("axios");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const { cloudinary, storage } = require("./cloudinary");
+
 
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 // ---------------------- Uploads (multer) ----------------------
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => cb(null, "uploads/"),
-    filename: (req, file, cb) =>
-      cb(
-        null,
-        Date.now() +
-          "_" +
-          Math.round(Math.random() * 1e9) +
-          path.extname(file.originalname)
-      ),
-  }),
-});
+const upload = multer({ storage });
 
 // === Auth imports (bcrypt, jwt)
 const bcrypt = require("bcryptjs");
@@ -549,7 +539,7 @@ app.get("/api/posts", async (req, res) => {
   }
 });
 
-// CREATE post (supports image upload)
+// CREATE post (uses Cloudinary to store images)
 app.post(
   "/api/posts",
   requireAuth,
@@ -559,7 +549,6 @@ app.post(
       const { title, category, area, ingredients, instructions, content } =
         req.body;
 
-      // Required fields
       if (!title || !category || !area || !ingredients || !instructions) {
         return res.status(400).json({
           error:
@@ -567,7 +556,6 @@ app.post(
         });
       }
 
-      // Parse ingredients (may arrive as JSON string)
       let parsedIngredients;
       try {
         parsedIngredients =
@@ -584,7 +572,7 @@ app.post(
         return res.status(400).json({ error: "Invalid ingredients format" });
       }
 
-      const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+      const imageUrl = req.file ? req.file.path : null;
 
       const post = await prisma.post.create({
         data: {
@@ -606,6 +594,7 @@ app.post(
     }
   }
 );
+
 
 // TOGGLE like/unlike — returns { liked, likes }
 app.post("/api/posts/:id/like", requireAuth, async (req, res) => {
@@ -674,14 +663,14 @@ app.delete("/api/posts/:id", requireAuth, async (req, res) => {
     if (post.userId !== req.user.sub)
       return res.status(403).json({ error: "Not allowed" });
 
-    if (post.imageUrl && post.imageUrl.startsWith("/uploads/")) {
-      const abs = path.join(
-        process.cwd(),
-        "uploads",
-        path.basename(post.imageUrl)
-      );
-      fs.unlink(abs, () => {}); // best-effort
+  if (post.imageUrl) {
+    try {
+      const publicId = post.imageUrl.split("/").slice(-1)[0].split(".")[0];
+      await cloudinary.uploader.destroy(`recipe-app-posts/${publicId}`);
+    } catch (err) {
+      console.error("Cloudinary delete failed:", err);
     }
+  }
 
     await prisma.postLike.deleteMany({ where: { postId: id } });
     await prisma.postComment.deleteMany({ where: { postId: id } });

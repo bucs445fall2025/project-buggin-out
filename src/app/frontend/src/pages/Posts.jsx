@@ -69,7 +69,7 @@ export default function Posts() {
 
               {post.imageUrl && (
                 <img
-                  src={`${API_BASE}${post.imageUrl}`}
+                  src={post.imageUrl}
                   className="post-img"
                   alt={post.title}
                 />
@@ -107,7 +107,7 @@ export default function Posts() {
 
             {selectedPost.imageUrl && (
               <img
-                src={`${API_BASE}${selectedPost.imageUrl}`}
+                src={selectedPost.imageUrl}
                 className="modal-img"
               />
             )}
