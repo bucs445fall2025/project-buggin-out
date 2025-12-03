@@ -443,9 +443,7 @@ export default function Posts() {
                         </div>
                       )}
                       {/* User Display Name */}
-                      <span className="comment-user">
-                        **{userDisplayName}**
-                      </span>
+                      <span className="comment-user">{userDisplayName}</span>
                     </div>
 
                     {/* Comment Body */}
