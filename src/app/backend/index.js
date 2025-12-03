@@ -627,9 +627,9 @@ app.delete("/api/posts/:id", requireAuth, async (req, res) => {
       }
     }
 
-    await prisma.postLike.deleteMany({ where: { postId: id } });
-    await prisma.postComment.deleteMany({ where: { postId: id } });
-    await prisma.post.delete({ where: { id } });
+    await prisma.PostLike.deleteMany({ where: { postId: id } });
+    await prisma.PostComment.deleteMany({ where: { postId: id } });
+    await prisma.Post.delete({ where: { id } });
 
     res.json({ ok: true });
   } catch (err) {
@@ -643,20 +643,29 @@ app.delete("/api/posts/:id", requireAuth, async (req, res) => {
 app.post("/api/posts/:postId/like", requireAuth, async (req, res) => {
   const { postId } = req.params;
 
-  const existing = await prisma.like.findUnique({
-    where: { userId_postId: { userId: req.user.sub, postId: Number(postId) } },
-  });
+  try {
+    const existing = await prisma.PostLike.findUnique({
+      where: {
+        // CORRECTED KEY: postId_userId
+        postId_userId: { userId: req.user.sub, postId: Number(postId) },
+      },
+    });
 
-  if (existing) {
-    await prisma.like.delete({ where: { id: existing.id } });
-    return res.json({ liked: false });
+    if (existing) {
+      // Unlike logic
+      await prisma.PostLike.delete({ where: { id: existing.id } });
+      return res.json({ liked: false });
+    }
+
+    // Like logic
+    await prisma.PostLike.create({
+      data: { userId: req.user.sub, postId: Number(postId) },
+    });
+
+    res.json({ liked: true });
+  } catch (err) {
+    // ... error handling
   }
-
-  await prisma.like.create({
-    data: { userId: req.user.sub, postId: Number(postId) },
-  });
-
-  res.json({ liked: true });
 });
 // GET Comments for a post
 app.get("/api/posts/:postId/comments", async (req, res) => {

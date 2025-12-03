@@ -1,11 +1,12 @@
 /* =========================================================
-   Posts Page Styling — clean, modern, matches Recipes layout
+   Posts Page Styling — Match requested card design (image_38465b.jpg)
    ========================================================= */
 
 /* --- PAGE WRAPPER --- */
 .posts-page {
   padding: 80px 16px 40px;
   min-height: 100vh;
+  /* Retained subtle background gradient */
   background: radial-gradient(
       1200px 600px at -10% -10%,
       #e9f0ff 0,
@@ -65,159 +66,157 @@
   color: #475569;
 }
 
-.error-message {
-  color: #b91c1c;
-  font-weight: 600;
-}
-
 /* --- POSTS GRID --- */
 .posts-container {
   width: 100%;
-  max-width: 80vw;
+  max-width: 90vw;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
 }
 
-/* --- POST CARD --- */
+/* =========================================================
+   POST CARD STYLES
+   ========================================================= */
+
 .post-card {
-  background: #ffffffcc;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(16, 24, 40, 0.06);
+  background: white;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 6px 24px rgba(17, 24, 39, 0.06);
+  padding: 16px; /* Padding reduced to align with sample image */
+  padding-bottom: 12px;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.05);
   transition: transform 0.15s ease, box-shadow 0.2s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 .post-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.12);
+  box-shadow: 0 10px 20px rgba(17, 24, 39, 0.1);
 }
 
-.post-card h3 {
+/* --- Date Flag (New Element) --- */
+.post-date-flag {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: #34d399; /* Green background from sample */
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 10;
+}
+
+.post-title-header {
   margin-top: 0;
-  font-size: 18px;
+  padding-top: 8px; /* Offset for date flag */
+  font-size: 1.1rem;
   font-weight: 700;
   color: #0f172a;
+  line-height: 1.3;
 }
 
-/* --- POST IMAGE --- */
+.post-snippet-content {
+  font-size: 0.85rem;
+  color: #475569;
+  line-height: 1.4;
+  margin-bottom: 12px;
+  min-height: 40px; /* To prevent jumping when description is short */
+}
+
+/* --- Post Image --- */
+.post-image-wrapper {
+  cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
 .post-img {
   width: 100%;
-  height: 180px;
+  height: 250px;
   object-fit: cover;
-  border-radius: 12px;
-  margin: 12px 0;
-}
-
-/* --- META COUNTS (likes + comments) --- */
-.post-meta {
-  display: flex;
-  justify-content: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: #475569;
-}
-
-/* --- POST SNIPPET --- */
-.post-snippet {
-  font-size: 14px;
-  color: #475569;
-  line-height: 1.45;
-  margin-bottom: 14px;
+  display: block;
 }
 
 /* =========================================================
-   LIKE BUTTON — turns color when liked
+   POST FOOTER (User Info & Actions/Counts)
    ========================================================= */
 
-.like-btn {
-  padding: 6px 12px;
-  border-radius: 10px;
+.post-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  border-top: 1px solid #f3f4f6;
+  margin-top: auto; /* Pushes footer to the bottom */
+}
+
+/* --- User Info --- */
+.post-user-info {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+}
+
+.post-user-avatar,
+.post-default-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 8px;
+  object-fit: cover;
+  border: 1px solid #f3f4f6;
+}
+
+.post-default-avatar {
+  background-color: #fca5a5; /* Light red/pink for default */
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.post-username {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* --- Action Counts --- */
+.post-actions-counts {
+  display: flex;
+  gap: 8px;
+}
+
+.post-action-btn {
+  background: none;
   border: none;
   cursor: pointer;
-  font-size: 14px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  font-size: 0.9rem;
   font-weight: 600;
+  color: #475569;
+  transition: background 0.1s;
+}
+
+.post-action-btn:hover {
   background: #f1f5f9;
-  transition: background 0.2s, transform 0.1s;
 }
 
-.like-btn:hover {
-  background: #e2e8f0;
-  transform: translateY(-1px);
-}
-
-.like-btn.liked {
-  background: #ff5478 !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(255, 84, 120, 0.3);
-}
-
-.like-btn.liked:hover {
-  background: #ff6e8c !important;
+.post-action-btn.liked {
+  color: #ef4444; /* Red heart */
 }
 
 /* =========================================================
-   COMMENTS BUTTON
+   MODAL STYLES (Post Details)
    ========================================================= */
-
-.comment-btn {
-  /* Renamed from .comments-button in your Posts.jsx */
-  background: #eef2ff;
-  border: 1px solid #c7d2fe;
-  padding: 6px 12px;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-.comment-btn:hover {
-  background: #e0e7ff;
-  border-color: #a5b4fc;
-}
-
-/* --- POST ACTIONS ROW --- */
-.post-actions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 10px;
-}
-
-.view-post-button {
-  background: #f3f4f6;
-  border: 1px solid #d1d5db;
-  padding: 8px 12px;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-.view-post-button:hover {
-  background: #e5e7eb;
-  border-color: #cbd5e1;
-}
-
-/* =========================================================
-   MODAL STYLES (for Post Details and Comments)
-   ========================================================= */
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 .modal-overlay {
   position: fixed;
@@ -242,63 +241,18 @@
   animation: modalFadeIn 0.25s ease-out;
 }
 
-.modal-close {
-  position: absolute;
-  right: 16px;
-  top: 12px;
-  border: none;
-  background: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #555;
-  transition: color 0.2s;
-}
-
-.modal-close:hover {
-  color: #000;
-}
-
-.modal-img {
-  width: 100%;
-  border-radius: 14px;
-  margin: 12px 0 20px;
-}
-
-.modal-section h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-top: 15px;
-  margin-bottom: 8px;
-}
-
-.modal-body {
-  white-space: pre-wrap;
-  font-size: 15px;
-  color: #374151;
-  line-height: 1.55;
-}
-
-/* --- Ingredients list inside modal --- */
-.ingredients-list {
-  padding-left: 16px;
-  margin-bottom: 22px;
-}
-
-.ingredients-list li {
-  font-size: 15px;
-  margin: 4px 0;
-  color: #374151;
-}
-
 /* =========================================================
-   COMMENTS SECTION STYLES (New/Updated)
+   COMMENTS MODAL STYLES (Updated from previous request)
    ========================================================= */
 
+.comments-modal h2 {
+  margin-bottom: 10px;
+}
+
 .comments-list {
-  max-height: calc(85vh - 200px); /* Adjust height based on modal size */
+  max-height: calc(85vh - 200px); /* Space for header and input */
   overflow-y: auto;
-  padding-right: 10px; /* Space for scrollbar */
+  padding-right: 10px;
   margin-top: 15px;
   margin-bottom: 15px;
 }
@@ -310,7 +264,7 @@
 }
 
 .comment-item {
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #f3f4f6;
   padding: 10px 0;
 }
 
@@ -324,17 +278,16 @@
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: 8px;
   object-fit: cover;
-  border: 1px solid #e2e8f0;
 }
 
 .default-avatar {
   width: 30px;
   height: 30px;
   border-radius: 50%;
-  margin-right: 10px;
-  background-color: #6b7cff; /* Match primary brand color */
+  margin-right: 8px;
+  background-color: #6b7cff; /* Primary color for default */
   color: white;
   display: flex;
   justify-content: center;
@@ -344,14 +297,13 @@
 }
 
 .comment-user {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   color: #1f2937;
 }
 
 .comment-body-text {
-  /* Indent comment body to align with username */
-  margin-left: 40px;
+  margin-left: 38px; /* Aligns with name */
   font-size: 14px;
   color: #374151;
   line-height: 1.4;
@@ -361,14 +313,15 @@
 
 .comment-date {
   display: block;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #9ca3af;
-  margin-left: 40px;
+  margin-left: 38px;
 }
 
 .comment-input-row {
   display: flex;
-  padding-top: 10px;
+  padding-top: 15px;
+  margin-top: 10px;
   border-top: 1px solid #e5e7eb;
   gap: 10px;
 }
@@ -379,35 +332,32 @@
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 15px;
-  transition: border-color 0.2s;
-}
-
-.comment-input-row input:focus {
-  outline: none;
-  border-color: #6b7cff;
-  box-shadow: 0 0 0 2px rgba(107, 124, 255, 0.2);
 }
 
 .submit-comment-btn {
-  background: #6b7cff;
+  background: #0f172a; /* Dark background for 'Post' button like the sample */
   color: white;
   padding: 10px 20px;
   border: none;
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
+  transition: opacity 0.2s;
 }
 
-.submit-comment-btn:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
+.submit-comment-btn:disabled {
+  background: #94a3b8;
+  cursor: not-allowed;
 }
 
 /* --- MOBILE --- */
 @media (max-width: 480px) {
+  .posts-container {
+    grid-template-columns: 1fr;
+  }
+
   .post-img {
-    height: 150px;
+    height: 200px;
   }
 
   .modal-content {
