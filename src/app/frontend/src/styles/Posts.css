@@ -36,12 +36,11 @@
   width: 100%;
   max-width: 900px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   margin-bottom: 20px;
 }
 
 .create-post-btn {
-  margin: auto;
   background: #6b7cff;
   color: white;
   padding: 10px 16px;
@@ -74,7 +73,7 @@
 /* --- POSTS GRID --- */
 .posts-container {
   width: 100%;
-  max-width: 900px;
+  max-width: 80vw;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 20px;
@@ -112,6 +111,16 @@
   margin: 12px 0;
 }
 
+/* --- META COUNTS (likes + comments) --- */
+.post-meta {
+  display: flex;
+  justify-content: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: #475569;
+}
+
 /* --- POST SNIPPET --- */
 .post-snippet {
   font-size: 14px;
@@ -120,10 +129,63 @@
   margin-bottom: 14px;
 }
 
-/* --- POST ACTIONS --- */
+/* =========================================================
+   LIKE BUTTON — turns color when liked
+   ========================================================= */
+
+.like-btn {
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  background: #f1f5f9;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.like-btn:hover {
+  background: #e2e8f0;
+  transform: translateY(-1px);
+}
+
+.like-btn.liked {
+  background: #ff5478 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(255, 84, 120, 0.3);
+}
+
+.like-btn.liked:hover {
+  background: #ff6e8c !important;
+}
+
+/* =========================================================
+   COMMENTS BUTTON
+   ========================================================= */
+
+.comment-btn {
+  /* Renamed from .comments-button in your Posts.jsx */
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  padding: 6px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.comment-btn:hover {
+  background: #e0e7ff;
+  border-color: #a5b4fc;
+}
+
+/* --- POST ACTIONS ROW --- */
 .post-actions {
   display: flex;
+  gap: 10px;
   justify-content: flex-end;
+  margin-top: 10px;
 }
 
 .view-post-button {
@@ -143,8 +205,19 @@
 }
 
 /* =========================================================
-   MODAL STYLES (for the simple built-in modal)
+   MODAL STYLES (for Post Details and Comments)
    ========================================================= */
+
+@keyframes modalFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
 .modal-overlay {
   position: fixed;
@@ -178,12 +251,25 @@
   font-size: 20px;
   cursor: pointer;
   color: #555;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: #000;
 }
 
 .modal-img {
   width: 100%;
   border-radius: 14px;
   margin: 12px 0 20px;
+}
+
+.modal-section h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 15px;
+  margin-bottom: 8px;
 }
 
 .modal-body {
@@ -193,7 +279,132 @@
   line-height: 1.55;
 }
 
-/* --- MOBILE RESPONSIVE --- */
+/* --- Ingredients list inside modal --- */
+.ingredients-list {
+  padding-left: 16px;
+  margin-bottom: 22px;
+}
+
+.ingredients-list li {
+  font-size: 15px;
+  margin: 4px 0;
+  color: #374151;
+}
+
+/* =========================================================
+   COMMENTS SECTION STYLES (New/Updated)
+   ========================================================= */
+
+.comments-list {
+  max-height: calc(85vh - 200px); /* Adjust height based on modal size */
+  overflow-y: auto;
+  padding-right: 10px; /* Space for scrollbar */
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.no-comments {
+  font-style: italic;
+  color: #777;
+  padding: 10px 0;
+}
+
+.comment-item {
+  border-bottom: 1px solid #eee;
+  padding: 10px 0;
+}
+
+.comment-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.comment-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+}
+
+.default-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  margin-right: 10px;
+  background-color: #6b7cff; /* Match primary brand color */
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.comment-user {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.comment-body-text {
+  /* Indent comment body to align with username */
+  margin-left: 40px;
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.4;
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+
+.comment-date {
+  display: block;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-left: 40px;
+}
+
+.comment-input-row {
+  display: flex;
+  padding-top: 10px;
+  border-top: 1px solid #e5e7eb;
+  gap: 10px;
+}
+
+.comment-input-row input {
+  flex-grow: 1;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+
+.comment-input-row input:focus {
+  outline: none;
+  border-color: #6b7cff;
+  box-shadow: 0 0 0 2px rgba(107, 124, 255, 0.2);
+}
+
+.submit-comment-btn {
+  background: #6b7cff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.submit-comment-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* --- MOBILE --- */
 @media (max-width: 480px) {
   .post-img {
     height: 150px;
@@ -201,5 +412,14 @@
 
   .modal-content {
     padding: 18px;
+    height: 90vh;
+  }
+
+  .comment-input-row {
+    flex-direction: column;
+  }
+
+  .submit-comment-btn {
+    width: 100%;
   }
 }

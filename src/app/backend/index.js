@@ -10,7 +10,6 @@ const path = require("path");
 const fs = require("fs");
 const { cloudinary, storage } = require("./cloudinary");
 
-
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
@@ -177,7 +176,6 @@ app.put("/api/profile", requireAuth, async (req, res) => {
     res.status(500).json({ error: "Failed to update profile" });
   }
 });
-
 
 // === RECIPE ROUTES ===================================================
 
@@ -585,39 +583,6 @@ app.post(
   }
 );
 
-
-// TOGGLE like/unlike — returns { liked, likes }
-app.post("/api/posts/:id/like", requireAuth, async (req, res) => {
-  try {
-    const postId = Number(req.params.id);
-    const userId = req.user.sub;
-
-    const existing = await prisma.postLike.findFirst({
-      where: { postId, userId },
-    });
-
-    if (existing) {
-      // UNLIKE
-      await prisma.postLike.delete({ where: { id: existing.id } });
-    } else {
-      // LIKE
-      await prisma.postLike.create({ data: { postId, userId } });
-    }
-
-    const likes = await prisma.postLike.findMany({
-      where: { postId },
-      select: { userId: true, postId: true },
-      orderBy: { id: "asc" },
-    });
-    const liked = likes.some((l) => l.userId === userId);
-
-    return res.json({ liked, likes });
-  } catch (err) {
-    console.error("Like toggle error:", err);
-    res.status(500).json({ error: "Failed to toggle like" });
-  }
-});
-
 // GET current user's posts
 app.get("/api/posts/mine", requireAuth, async (req, res) => {
   try {
@@ -653,14 +618,14 @@ app.delete("/api/posts/:id", requireAuth, async (req, res) => {
     if (post.userId !== req.user.sub)
       return res.status(403).json({ error: "Not allowed" });
 
-  if (post.imageUrl) {
-    try {
-      const publicId = post.imageUrl.split("/").slice(-1)[0].split(".")[0];
-      await cloudinary.uploader.destroy(`recipe-app-posts/${publicId}`);
-    } catch (err) {
-      console.error("Cloudinary delete failed:", err);
+    if (post.imageUrl) {
+      try {
+        const publicId = post.imageUrl.split("/").slice(-1)[0].split(".")[0];
+        await cloudinary.uploader.destroy(`recipe-app-posts/${publicId}`);
+      } catch (err) {
+        console.error("Cloudinary delete failed:", err);
+      }
     }
-  }
 
     await prisma.postLike.deleteMany({ where: { postId: id } });
     await prisma.postComment.deleteMany({ where: { postId: id } });
@@ -673,58 +638,107 @@ app.delete("/api/posts/:id", requireAuth, async (req, res) => {
   }
 });
 
-// === JOURNEY (diary) ROUTES ==========================================
-app.get("/api/journey", requireAuth, async (req, res) => {
-  try {
-    const rows = await prisma.journeyEntry.findMany({
-      where: { userId: req.user.sub },
-      orderBy: { createdAt: "desc" },
-    });
-    res.json(rows);
-  } catch (err) {
-    console.error("Journey list error:", err);
-    res.status(500).json({ error: "Failed to load journey" });
+// Likes and Comments
+// TOGGLE like/unlike — returns { liked, likes }
+app.post("/api/posts/:postId/like", requireAuth, async (req, res) => {
+  const { postId } = req.params;
+
+  const existing = await prisma.like.findUnique({
+    where: { userId_postId: { userId: req.user.sub, postId: Number(postId) } },
+  });
+
+  if (existing) {
+    await prisma.like.delete({ where: { id: existing.id } });
+    return res.json({ liked: false });
   }
+
+  await prisma.like.create({
+    data: { userId: req.user.sub, postId: Number(postId) },
+  });
+
+  res.json({ liked: true });
+});
+// GET Comments for a post
+app.get("/api/posts/:postId/comments", async (req, res) => {
+  const comments = await prisma.PostComment.findMany({
+    where: { postId: Number(req.params.postId) },
+    include: { user: { include: { profile: true } } },
+    orderBy: { createdAt: "asc" },
+  });
+
+  res.json(comments);
 });
 
-app.post("/api/journey", requireAuth, async (req, res) => {
-  try {
-    const { title = "", content = "" } = req.body || {};
-    if (!content.trim()) {
-      return res.status(400).json({ error: "Content cannot be empty" });
-    }
-    const created = await prisma.journeyEntry.create({
-      data: {
-        userId: req.user.sub,
-        title: title.trim() || null,
-        content: content.trim(),
-      },
-    });
-    res.status(201).json(created);
-  } catch (err) {
-    console.error("Journey create error:", err);
-    res.status(500).json({ error: "Failed to save entry" });
-  }
+// ADD Comment to a post
+app.post("/api/posts/:postId/comments", requireAuth, async (req, res) => {
+  const { body } = req.body;
+
+  if (!body) return res.status(400).json({ error: "Comment body required" });
+
+  const comment = await prisma.PostComment.create({
+    data: {
+      body,
+      postId: Number(req.params.postId),
+      userId: req.user.sub,
+    },
+    include: { user: { include: { profile: true } } },
+  });
+
+  res.json(comment);
 });
 
-app.delete("/api/journey/:id", requireAuth, async (req, res) => {
-  try {
-    const id = Number(req.params.id);
-    if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+// // === JOURNEY (diary) ROUTES ==========================================
+// app.get("/api/journey", requireAuth, async (req, res) => {
+//   try {
+//     const rows = await prisma.journeyEntry.findMany({
+//       where: { userId: req.user.sub },
+//       orderBy: { createdAt: "desc" },
+//     });
+//     res.json(rows);
+//   } catch (err) {
+//     console.error("Journey list error:", err);
+//     res.status(500).json({ error: "Failed to load journey" });
+//   }
+// });
 
-    const entry = await prisma.journeyEntry.findUnique({ where: { id } });
-    if (!entry) return res.status(404).json({ error: "Not found" });
-    if (entry.userId !== req.user.sub) {
-      return res.status(403).json({ error: "Not allowed" });
-    }
+// app.post("/api/journey", requireAuth, async (req, res) => {
+//   try {
+//     const { title = "", content = "" } = req.body || {};
+//     if (!content.trim()) {
+//       return res.status(400).json({ error: "Content cannot be empty" });
+//     }
+//     const created = await prisma.journeyEntry.create({
+//       data: {
+//         userId: req.user.sub,
+//         title: title.trim() || null,
+//         content: content.trim(),
+//       },
+//     });
+//     res.status(201).json(created);
+//   } catch (err) {
+//     console.error("Journey create error:", err);
+//     res.status(500).json({ error: "Failed to save entry" });
+//   }
+// });
 
-    await prisma.journeyEntry.delete({ where: { id } });
-    res.json({ ok: true });
-  } catch (err) {
-    console.error("Journey delete error:", err);
-    res.status(500).json({ error: "Failed to delete entry" });
-  }
-});
+// app.delete("/api/journey/:id", requireAuth, async (req, res) => {
+//   try {
+//     const id = Number(req.params.id);
+//     if (Number.isNaN(id)) return res.status(400).json({ error: "Invalid id" });
+
+//     const entry = await prisma.journeyEntry.findUnique({ where: { id } });
+//     if (!entry) return res.status(404).json({ error: "Not found" });
+//     if (entry.userId !== req.user.sub) {
+//       return res.status(403).json({ error: "Not allowed" });
+//     }
+
+//     await prisma.journeyEntry.delete({ where: { id } });
+//     res.json({ ok: true });
+//   } catch (err) {
+//     console.error("Journey delete error:", err);
+//     res.status(500).json({ error: "Failed to delete entry" });
+//   }
+// });
 
 // ---------------------- Start server ----------------------
 app.listen(port, () => {

@@ -89,7 +89,7 @@ model Post {
 
 model PostComment {
   id        Int      @id @default(autoincrement())
-  text      String
+  body      String
   createdAt DateTime @default(now())
 
   postId    Int
@@ -104,6 +104,7 @@ model PostLike {
 
   postId    Int
   userId    Int
+  createdAt DateTime @default(now())
 
   post      Post @relation(fields: [postId], references: [id])
   user      User @relation(fields: [userId], references: [id])
