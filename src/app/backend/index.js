@@ -156,38 +156,28 @@ app.put("/api/profile", requireAuth, async (req, res) => {
     const userId = req.user.sub;
     const { displayName, bio, avatarUrl } = req.body;
 
-    const updated = await prisma.profile.update({
+    const profile = await prisma.profile.upsert({
       where: { userId },
-      data: {
+      update: {
         displayName: displayName ?? undefined,
         bio: bio ?? undefined,
         avatarUrl: avatarUrl ?? undefined,
       },
+      create: {
+        userId,
+        displayName: displayName || "",
+        bio: bio || "",
+        avatarUrl: avatarUrl || "",
+      },
     });
 
-    res.json(updated);
+    res.json(profile);
   } catch (err) {
     console.error("Profile update failed:", err);
     res.status(500).json({ error: "Failed to update profile" });
   }
 });
 
-app.get("/api/profile", requireAuth, async (req, res) => {
-  const profile = await prisma.profile.findUnique({
-    where: { userId: req.user.sub },
-  });
-  res.json(profile);
-});
-
-app.put("/api/profile", requireAuth, async (req, res) => {
-  const { displayName, bio, avatarUrl } = req.body || {};
-  const profile = await prisma.profile.upsert({
-    where: { userId: req.user.sub },
-    update: { displayName, bio, avatarUrl },
-    create: { userId: req.user.sub, displayName: displayName || "" },
-  });
-  res.json(profile);
-});
 
 // === RECIPE ROUTES ===================================================
 

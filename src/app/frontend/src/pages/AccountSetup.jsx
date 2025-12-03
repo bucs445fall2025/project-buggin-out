@@ -13,28 +13,60 @@ export default function AccountSetup() {
   const [saved, setSaved] = useState(false);
   const navigate = useNavigate();
 
-  const onPickImage = (e) => {
+  const onPickImage = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setAvatarPreview(reader.result.toString());
-    reader.readAsDataURL(file);
+
+    // Show preview
+    setAvatarPreview(URL.createObjectURL(file));
+
+    // Upload to Cloudinary
+    const url = await uploadToCloudinary(file);
+
+    // Save real Cloudinary URL for backend
+    storage.setItem("profile.avatarUrl", url);
   };
 
-  const onSubmit = (e) => {
+
+  const onSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
-    // Persist to storage for now (backend later)
-    storage.setItem("profile.bio", about.trim());
-    if (avatarPreview) storage.setItem("profile.avatarDataUrl", avatarPreview);
-    if (userType) storage.setItem("profile.userType", userType);
-    setTimeout(() => {
-      setSaving(false);
-      setSaved(true);
-      // Optional: take user to Profile after save
-      navigate("/profile");
-    }, 350);
+
+    const payload = {
+      displayName: storage.getItem("profile.userType"),
+      bio: about,
+      avatarUrl: storage.getItem("profile.avatarUrl")
+    };
+
+    await fetch(`${API_BASE}/api/profile`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    setSaving(false);
+    setSaved(true);
+    navigate("/profile");
   };
+
+
+  async function uploadToCloudinary(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_PRESET);
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD}/image/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
+    );
+
+    const data = await res.json();
+    return data.secure_url; // This is the usable avatarUrl
+  }
+
 
   return (
     <div className="asu-container">

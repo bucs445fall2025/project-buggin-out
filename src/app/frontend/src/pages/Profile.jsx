@@ -15,6 +15,7 @@ export default function Profile() {
   // Profile basics
   const [displayName, setDisplayName] = useState("Loading…");
   const [bio, setBio] = useState("");
+  const [avatarFile, setAvatarFile] = useState(null);
   const [avatar, setAvatar] = useState("");
   const [profileDescription, setProfileDescription] = useState("");
   const [avatarPreview, setAvatarPreview] = useState(
@@ -48,18 +49,31 @@ export default function Profile() {
   };
   const closeModal = () => setIsModalOpen(false);
 
+  async function uploadToCloudinary(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_PRESET);
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD}/image/upload`,
+      { method: "POST", body: formData }
+    );
+
+    const data = await res.json();
+    return data.secure_url;
+  }
+
   // Load display name from backend
   useEffect(() => {
     const run = async () => {
       try {
         const token = localStorage.getItem("token");
-        if (!token) {
-          setDisplayName("Guest");
-          return;
-        }
+        if (!token) return;
+
         const res = await fetch(`${API_BASE}/api/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        
         const data = await res.json();
         if (!res.ok) throw new Error(data?.error || "Failed to load profile.");
 
@@ -173,11 +187,15 @@ export default function Profile() {
     loadJourney();
   }, []);
 
-  // Save profile (local-only)
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Not authenticated");
+
+      let uploadedUrl = avatar; // Keep existing avatar if unchanged
+
+      // upload only if user picked a new file
+      if (avatarFile) uploadedUrl = await uploadToCloudinary(avatarFile);
 
       const res = await fetch(`${API_BASE}/api/profile`, {
         method: "PUT",
@@ -188,14 +206,13 @@ export default function Profile() {
         body: JSON.stringify({
           displayName,
           bio: profileDescription,
-          avatarUrl: avatarPreview, // optional
+          avatarUrl: uploadedUrl, // send Cloudinary URL to backend
         }),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data?.error || "Profile update failed");
+      if (!res.ok) throw new Error(data.error || "Profile update failed");
 
-      // Update local UI
       setBio(data.bio);
       setDisplayName(data.displayName);
       setAvatar(data.avatarUrl);
@@ -205,11 +222,13 @@ export default function Profile() {
       alert(err.message);
     }
   };
-
-  // Avatar picker
+  // avatar picker
   const onPickImage = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setAvatarFile(file); // Store actual file for Cloudinary upload
+
     const reader = new FileReader();
     reader.onload = () => setAvatarPreview(reader.result.toString());
     reader.readAsDataURL(file);
