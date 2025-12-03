@@ -374,7 +374,7 @@ export default function Profile() {
             Edit Profile
           </div>
           <div className="pf-name">{displayName}</div>
-          <div className="pf-bio">{bio}</div>
+          <div className="pf-bio">Biography: {bio}</div>
         </aside>
 
         {/* RIGHT: tabs + content */}
@@ -405,22 +405,23 @@ export default function Profile() {
         <div className="modal">
           <div className="modal-content">
             <h2>Edit Profile</h2>
-
-            <input
-              className="pf-input"
-              type="text"
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              placeholder="Username"
-            />
-
+            <div>
+              Username:
+              <input
+                className="pf-input"
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Username"
+              />{" "}
+            </div>
+            Profile Description:
             <textarea
               className="pf-textarea"
               value={profileDescription}
               onChange={(e) => setProfileDescription(e.target.value)}
               placeholder="Edit your profile description"
             />
-
             <div>
               <input
                 className="pf-file-input"
@@ -436,9 +437,10 @@ export default function Profile() {
                 />
               )}
             </div>
-
-            <button onClick={handleSubmit}>Submit</button>
-            <button onClick={closeModal} style={{ marginLeft: "10px" }}>
+            <button className="submit-btn" onClick={handleSubmit}>
+              Submit
+            </button>
+            <button className="cancel-btn" onClick={closeModal}>
               Cancel
             </button>
           </div>
