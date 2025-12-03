@@ -284,7 +284,7 @@ export default function Posts() {
             const userAvatarUrl = post.user?.profile?.avatarUrl;
 
             return (
-              <div className="post-card" key={post.id}>
+              <div className="post-card" key={post.id} data-aos="zoom-in-up">
                 {/* Date Flag */}
                 <span className="post-date-flag">
                   {formatDate(post.createdAt)}

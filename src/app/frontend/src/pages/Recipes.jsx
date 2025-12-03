@@ -30,7 +30,9 @@ export default function RecipesPage() {
       setError(null);
 
       try {
-        const catRes = await fetch(`${API_BASE}/api/recipes/themealdb/categories`);
+        const catRes = await fetch(
+          `${API_BASE}/api/recipes/themealdb/categories`
+        );
         if (catRes.ok) {
           const catData = await catRes.json();
           setCategories(catData.map((c) => c.strCategory).sort());
@@ -38,7 +40,8 @@ export default function RecipesPage() {
 
         const res = await fetch(`${API_BASE}/api/recipes/themealdb/random_3`);
         const data = await res.json();
-        if (!res.ok) throw new Error(data?.error || "Failed to fetch random recipes");
+        if (!res.ok)
+          throw new Error(data?.error || "Failed to fetch random recipes");
 
         setRecipes(data);
         setIsRandomView(true);
@@ -82,7 +85,9 @@ export default function RecipesPage() {
 
   const openRecipeModal = async (mealId) => {
     try {
-      const res = await fetch(`${API_BASE}/api/recipes/themealdb/details/${mealId}`);
+      const res = await fetch(
+        `${API_BASE}/api/recipes/themealdb/details/${mealId}`
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error);
       setSelectedRecipe(data);
@@ -178,7 +183,9 @@ export default function RecipesPage() {
   if (isLoading) {
     return (
       <div className="rec-container">
-        <div className="recipes-container">Loading your initial random recipes... 🍽️</div>
+        <div className="recipes-container">
+          Loading your initial random recipes... 🍽️
+        </div>
       </div>
     );
   }
@@ -229,12 +236,16 @@ export default function RecipesPage() {
               <input
                 type="text"
                 placeholder={`Enter ${
-                  filterType === "i" ? "ingredient (e.g., chicken breast)" : "recipe name"
+                  filterType === "i"
+                    ? "ingredient (e.g., chicken breast)"
+                    : "recipe name"
                 }`}
                 value={searchTerm}
                 onChange={(e) => {
                   const value = e.target.value;
-                  setSearchTerm(filterType === "i" ? value.replace(/\s+/g, "_") : value);
+                  setSearchTerm(
+                    filterType === "i" ? value.replace(/\s+/g, "_") : value
+                  );
                 }}
                 required
               />
@@ -245,7 +256,9 @@ export default function RecipesPage() {
             {isSearching ? "Searching..." : "Search Recipes"}
           </button>
         </form>
-        {isSearching && <p className="loading-message">Searching for recipes...</p>}
+        {isSearching && (
+          <p className="loading-message">Searching for recipes...</p>
+        )}
       </div>
 
       <hr />
@@ -259,24 +272,36 @@ export default function RecipesPage() {
       {error && <div className="error-message">Error: {error}</div>}
 
       {recipes.length === 0 && !isSearching ? (
-        <div className="no-results">No recipes found. Try a different search term or category.</div>
+        <div className="no-results">
+          No recipes found. Try a different search term or category.
+        </div>
       ) : (
         <div className="recipes-container">
           {recipes.map((recipe) => {
             const isSaved = savedIds.includes(String(recipe.id));
             return (
-              <div key={recipe.id} className="recipe-card">
-                <img src={recipe.image} alt={recipe.title} className="recipe-image" />
+              <div key={recipe.id} className="recipe-card" data-aos="fade-up">
+                <img
+                  src={recipe.image}
+                  alt={recipe.title}
+                  className="recipe-image"
+                />
                 <h3>{recipe.title}</h3>
                 <p className="mealdb-description">{recipe.description}</p>
 
                 <div className="recipe-actions">
-                  <button className="view-recipe-button" onClick={() => openRecipeModal(recipe.id)}>
+                  <button
+                    className="view-recipe-button"
+                    onClick={() => openRecipeModal(recipe.id)}
+                  >
                     View Details
                   </button>
 
                   {!isSaved ? (
-                    <button className="add-recipe-button" onClick={() => handleSaveRecipe(recipe)}>
+                    <button
+                      className="add-recipe-button"
+                      onClick={() => handleSaveRecipe(recipe)}
+                    >
                       Add Recipe
                     </button>
                   ) : (

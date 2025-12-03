@@ -291,7 +291,11 @@ export default function Profile() {
 
       <div className="pf-saved-grid">
         {filteredSaved.map((r) => (
-          <article key={r.recipeId} className="pf-saved-card">
+          <article
+            key={r.recipeId}
+            className="pf-saved-card"
+            data-aos="fade-up"
+          >
             <img className="pf-saved-img" src={r.image} alt="" />
             <div className="pf-saved-body">
               <div className="pf-saved-name">{r.title}</div>
@@ -357,7 +361,7 @@ export default function Profile() {
 
   return (
     <div className="pf-container">
-      <div className="pf-shell">
+      <div className="pf-shell" data-aos="fade-up">
         {/* LEFT: avatar + name + bio */}
         <aside className="pf-left">
           {avatar ? (
@@ -394,7 +398,6 @@ export default function Profile() {
           </div>
 
           <section className="pf-content" role="tabpanel">
-            {/* 6. REMOVE JOURNEY RENDER CONDITION */}
             {active === "Saved Recipes" ? renderSavedTab() : renderPostsTab()}
           </section>
         </main>

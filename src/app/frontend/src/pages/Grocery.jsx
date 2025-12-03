@@ -105,7 +105,7 @@ export default function Grocery() {
 
   return (
     <div className="groc-page">
-      <div className="groc-shell">
+      <div className="groc-shell" data-aos="fade-up">
         {/* LEFT: Saved list + search (DB-backed only) */}
         <aside className="groc-left" aria-label="Saved recipes">
           <header className="groc-header">
@@ -151,6 +151,7 @@ export default function Grocery() {
               filtered.map((r) => (
                 <div
                   key={r.recipeId}
+                  data0aos="fade-up"
                   className={`groc-item-row ${
                     selectedRecipe && selectedRecipe.recipeId === r.recipeId
                       ? "active"

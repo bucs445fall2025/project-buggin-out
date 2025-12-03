@@ -219,13 +219,31 @@ app.get("/api/recipes/random", async (req, res) => {
   }
 });
 
-app.get("/api/recipes/:id/macros", async (req, res) => {
+// GET /api/recipes/macrosByTitle?title=Chicken%20Soup
+app.get("/api/recipes/macrosByTitle", async (req, res) => {
   try {
-    const { id } = req.params;
-    const { data } = await spoon.get(`/recipes/${id}/information`, {
-      params: { includeNutrition: true },
+    const { title } = req.query;
+    if (!title) return res.status(400).json({ error: "Title is required" });
+
+    // Step 1: Search by title
+    const search = await spoon.get("/recipes/complexSearch", {
+      params: {
+        query: title,
+        number: 1,
+        addRecipeInformation: true,
+        addRecipeNutrition: true,
+      },
     });
-    const nutrients = data?.nutrition?.nutrients || [];
+
+    const result = search.data?.results?.[0];
+    if (!result) {
+      return res
+        .status(404)
+        .json({ error: "No recipe found with that title." });
+    }
+
+    // Step 2: Extract macros from nutrients array
+    const nutrients = result?.nutrition?.nutrients || [];
     const get = (name) => nutrients.find((n) => n.name === name)?.amount || 0;
 
     const macros = {
@@ -234,13 +252,15 @@ app.get("/api/recipes/:id/macros", async (req, res) => {
       fat: Math.round(get("Fat")),
     };
 
-    res.json({ id, title: data.title, image: data.image, macros });
-  } catch (error) {
-    console.error("Macros route error:", error.response?.data || error.message);
-    res.status(error.response?.status || 500).json({
-      error: "Failed to fetch recipe macros",
-      details: error.response?.data || error.message,
+    return res.json({
+      title: result.title,
+      id: result.id,
+      image: result.image,
+      macros,
     });
+  } catch (error) {
+    console.error("macrosByTitle error:", error.response?.data || error);
+    res.status(500).json({ error: "Failed to fetch macros by title." });
   }
 });
 

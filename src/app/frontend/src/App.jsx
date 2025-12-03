@@ -1,5 +1,11 @@
 import { Routes, Route } from "react-router-dom";
+import { useEffect } from "react"; // 1. Import useEffect
 import "./App.css";
+
+// 2. Import AOS libraries
+import "aos/dist/aos.css";
+import AOS from "aos";
+
 import Home from "./pages/Home";
 import Recipes from "./pages/Recipes";
 import MacroTracker from "./pages/MacroTracker";
@@ -13,6 +19,17 @@ import Posts from "./pages/Posts";
 import UploadRecipe from "./pages/UploadRecipe";
 
 function App() {
+  // 3. Initialize AOS using useEffect
+  useEffect(() => {
+    AOS.init({
+      offset: 150, // Trigger animations 150px before element enters viewport
+      duration: 700, // Animation duration is 0.8 seconds
+      easing: "ease-out",
+      once: false, // Animation only happens once
+    });
+    AOS.refresh(); // Recalculate positions on component load
+  }, []);
+
   return (
     <>
       <NavBar />

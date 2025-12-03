@@ -155,7 +155,7 @@ export default function MacroTracker() {
 
   return (
     <div className="mtkt-container">
-      <div className="mtkt-shell">
+      <div className="mtkt-shell" data-aos="zoom-in-up">
         {/* LEFT: Saved list + search */}
         <aside className="mtkt-left">
           <h2 className="mtkt-title">Macro Tracker</h2>
