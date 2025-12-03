@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "../styles/Posts.css";
+// 1. Import showAlert utility
+import { showAlert } from "../util.js";
 
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3001";
 
@@ -108,8 +110,16 @@ export default function Posts() {
   // Like a post
   const handleLike = async (postId) => {
     if (!currentUser) {
-      // User must be logged in to like posts
-      return console.warn("User must be logged in to like posts.");
+      // Debugging: Check if this block is executed
+      console.log("User is not logged in. Showing alert.");
+
+      // Show alert if not logged in
+      showAlert(
+        "Login Required",
+        "You must be logged in to like posts.",
+        "error"
+      );
+      return;
     }
 
     const isLiking = postActivity[postId]?.isLiking;
@@ -181,7 +191,16 @@ export default function Posts() {
   // Post a new comment
   const submitComment = async () => {
     if (!newComment.trim()) return;
-    if (!token) return console.error("Authentication required to comment.");
+
+    if (!token) {
+      // 3. Show alert if not logged in
+      showAlert(
+        "Login Required",
+        "You must be logged in to post comments.",
+        "error"
+      );
+      return;
+    }
 
     const commentBody = newComment.trim();
     setNewComment(""); // Clear input immediately

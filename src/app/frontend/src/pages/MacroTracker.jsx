@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import "../styles/MacroTracker.css";
 
+// 1. Import SweetAlert2 utilities
+import { showAlert, showConfirm } from "../util.js";
+
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:3001";
 
 export default function MacroTracker() {
@@ -33,6 +36,7 @@ export default function MacroTracker() {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
+          // You could use showAlert here, but setting savedError might be better for the UI flow
           setSavedError("You must be logged in to view saved recipes.");
           setSaved([]);
           return;
@@ -49,6 +53,8 @@ export default function MacroTracker() {
       } catch (err) {
         setSavedError(err.message || "Failed to load saved recipes");
         setSaved([]);
+        // Optional: Show a standalone error alert
+        // showAlert("Load Error", err.message || "Failed to load saved recipes", "error");
       } finally {
         setLoadingSaved(false);
       }
@@ -59,7 +65,6 @@ export default function MacroTracker() {
 
   // ------------------------------------------------------------------
   // When selecting a recipe, fetch macros (and micros if available)
-  // via backend proxy: /api/recipes/macrosByTitle?title=...
   // ------------------------------------------------------------------
   useEffect(() => {
     const fetchMacros = async () => {
@@ -115,6 +120,9 @@ export default function MacroTracker() {
   }, [saved, query]);
 
   const removeRecipe = async (rid) => {
+    // Keep a reference to the recipe we are attempting to delete for restoration
+    const recipeToRestore = saved.find((r) => r.recipeId === rid);
+
     // Optimistically remove the recipe from the local state
     setSaved((list) => list.filter((r) => r.recipeId !== rid));
     if (selectedId === rid) setSelectedId(null);
@@ -122,7 +130,12 @@ export default function MacroTracker() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("You must be logged in to delete recipes.");
+        // 2. Replace alert() with showAlert() for auth error
+        showAlert(
+          "Authentication Required",
+          "You must be logged in to delete recipes.",
+          "warning"
+        );
         return;
       }
 
@@ -136,21 +149,53 @@ export default function MacroTracker() {
         throw new Error(data?.error || "Failed to delete the recipe.");
       }
 
-      const data = await res.json();
-      if (data.ok) {
-        console.log(`Recipe ${rid} deleted successfully.`);
-      }
+      // Success feedback
+      showAlert("Deleted!", `Successfully removed recipe ${rid}.`, "success");
     } catch (err) {
       console.error("Error deleting recipe:", err);
-      alert(err.message || "Failed to delete the recipe.");
-      // Optionally, re-add the recipe to the local state if the delete fails
-      setSaved((list) => [...list, saved.find((r) => r.recipeId === rid)]);
+      // 3. Replace alert() with showAlert() for API error
+      showAlert(
+        "Deletion Failed",
+        err.message || "Failed to delete the recipe.",
+        "error"
+      );
+
+      // Restore the recipe to the local state if the delete fails
+      if (recipeToRestore) {
+        setSaved((list) => [...list, recipeToRestore]);
+        // If the item was selected before failure, re-select it
+        if (selectedId === rid) setSelectedId(rid);
+      }
     }
   };
-  const confirmDelete = (rid) => {
-    if (window.confirm("Are you sure you want to delete this recipe?")) {
-      removeLocal(rid);
+
+  const confirmDelete = async (rid) => {
+    // 4. Replace window.confirm() with showConfirm()
+    const isConfirmed = await showConfirm(
+      "Confirm Deletion",
+      "Are you sure you want to delete this recipe? It will be removed from your saved list."
+    );
+
+    if (isConfirmed) {
+      removeRecipe(rid);
     }
+  };
+
+  // ------------------------------------------------------------------
+  // NEW: Search submission handler
+  // ------------------------------------------------------------------
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (!query.trim()) {
+      showAlert(
+        "Missing Input",
+        "Please type something to search your saved recipes.",
+        "warning"
+      );
+      return;
+    }
+    // Search is client-side, so no further action is required here,
+    // as the filtered list updates automatically via the `useMemo` hook.
   };
 
   return (
@@ -162,10 +207,8 @@ export default function MacroTracker() {
 
           <form
             className="mtkt-search"
-            onSubmit={(e) => {
-              e.preventDefault();
-              // search is client-side; nothing else to do
-            }}
+            // 2. Update onSubmit to use the new handler
+            onSubmit={handleSearchSubmit}
           >
             <input
               type="text"

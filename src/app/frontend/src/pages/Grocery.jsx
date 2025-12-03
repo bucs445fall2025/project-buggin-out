@@ -1,6 +1,9 @@
 import React, { useEffect, useState, useMemo } from "react";
 import "../styles/Grocery.css";
 
+// 1. Import SweetAlert2 utilities
+import { showAlert, showConfirm } from "../util.js";
+
 const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
 
 export default function Grocery() {
@@ -32,6 +35,8 @@ export default function Grocery() {
         if (list.length > 0) handleSelect(list[0]); // auto-select first
       } catch (err) {
         setMsg(err.message || "Failed to load saved recipes.");
+        // Optional: You could show a generic error alert here too
+        // showAlert("Load Error", err.message || "Failed to load saved recipes.", "error");
       } finally {
         setLoading(false);
       }
@@ -60,7 +65,7 @@ export default function Grocery() {
     setCheckedIngredients((prev) => ({ ...prev, [i]: !prev[i] }));
 
   // Delete a recipe from saved list (same workflow as MacroTracker)
-  const removeRecipe = async (rid) => {
+  const removeRecipe = async (rid, originalRecipe) => {
     // Optimistic update: remove locally
     setSavedRecipes((list) => list.filter((r) => r.recipeId !== rid));
 
@@ -72,7 +77,12 @@ export default function Grocery() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        alert("You must be logged in to delete recipes.");
+        // 2. Replace alert() with showAlert() for auth error
+        showAlert(
+          "Authentication Required",
+          "You must be logged in to delete recipes.",
+          "warning"
+        );
         return;
       }
 
@@ -83,23 +93,45 @@ export default function Grocery() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed to delete recipe");
+
+      // Optional: Show success alert
+      showAlert("Deleted!", `Successfully removed recipe ${rid}.`, "success");
     } catch (err) {
-      alert(err.message || "Failed to delete recipe.");
+      // 3. Replace alert() with showAlert() for API error
+      showAlert(
+        "Deletion Failed",
+        err.message || "Failed to delete recipe.",
+        "error"
+      );
 
       // Restore if something failed
       setSavedRecipes((list) => {
-        // find original recipe in filtered OR selectedRecipe OR do nothing
-        const originally = [...list, selectedRecipe].find(
-          (r) => r?.recipeId === rid
-        );
-        return originally ? [...list, originally] : list;
+        // use the originalRecipe passed down, or fallback to search
+        const recipeToRestore =
+          originalRecipe ||
+          [...list, selectedRecipe].find((r) => r?.recipeId === rid);
+
+        // Prevent duplicate restoration if the list already contains it
+        if (recipeToRestore && !list.some((r) => r.recipeId === rid)) {
+          return [...list, recipeToRestore];
+        }
+        return list;
       });
     }
   };
 
-  const confirmDelete = (rid) => {
-    if (window.confirm("Are you sure you want to delete this recipe?")) {
-      removeRecipe(rid);
+  const confirmDelete = async (rid) => {
+    const originalRecipe = savedRecipes.find((r) => r.recipeId === rid);
+
+    // 4. Replace window.confirm() with showConfirm()
+    const isConfirmed = await showConfirm(
+      "Confirm Deletion",
+      "Are you sure you want to delete this recipe from your saved list? This action cannot be undone."
+    );
+
+    if (isConfirmed) {
+      // Pass the original recipe object to aid in restoration if API fails
+      removeRecipe(rid, originalRecipe);
     }
   };
 
@@ -151,7 +183,6 @@ export default function Grocery() {
               filtered.map((r) => (
                 <div
                   key={r.recipeId}
-                  data0aos="fade-up"
                   className={`groc-item-row ${
                     selectedRecipe && selectedRecipe.recipeId === r.recipeId
                       ? "active"
@@ -186,7 +217,7 @@ export default function Grocery() {
 
         {/* RIGHT: Ingredients checklist */}
         <main className="groc-right" aria-live="polite">
-          <section className="groc-panel">
+          <section className="groc-panel" data-aos="fade-up">
             <div className="groc-panel-head">
               <h2 className="groc-panel-title">
                 {selectedRecipe

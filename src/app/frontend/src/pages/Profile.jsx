@@ -2,8 +2,10 @@
 import { useEffect, useMemo, useState } from "react";
 import "../styles/Profile.css";
 
+// 1. IMPORT SweetAlert2 utilities
+import { showAlert, showConfirm } from "../util.js";
+
 const API_BASE = import.meta.env?.VITE_API_BASE || "http://localhost:3001";
-// 1. REMOVE "Journey" from TABS constant
 const TABS = ["Saved Recipes", "Posts"];
 
 export default function Profile() {
@@ -33,10 +35,6 @@ export default function Profile() {
   const [myPosts, setMyPosts] = useState([]);
   const [loadingPosts, setLoadingPosts] = useState(true);
   const [postsError, setPostsError] = useState("");
-
-  // 2. REMOVE ALL JOURNEY STATE (entryTitle, entryText, journeyEntries, etc.)
-  // Note: These variables were not present in the provided state hooks,
-  // but if you were using them, they'd be removed here.
 
   // Modal open/close
   const openModal = () => {
@@ -160,8 +158,9 @@ export default function Profile() {
     loadMine();
   }, []);
 
-  // 3. REMOVE ALL JOURNEY-RELATED EFFECT HOOKS (None were present)
-
+  // ------------------------------------------------------------------
+  // 2. UPDATED handleSubmit
+  // ------------------------------------------------------------------
   const handleSubmit = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -193,10 +192,19 @@ export default function Profile() {
       setAvatar(data.avatarUrl);
 
       closeModal();
+
+      // SUCCESS ALERT
+      showAlert("Success!", "Your profile has been updated.", "success");
     } catch (err) {
-      alert(err.message);
+      // ERROR ALERT
+      showAlert(
+        "Update Failed",
+        err.message || "Failed to update profile.",
+        "error"
+      );
     }
   };
+
   // avatar picker
   const onPickImage = (e) => {
     const file = e.target.files?.[0];
@@ -209,9 +217,14 @@ export default function Profile() {
     reader.readAsDataURL(file);
   };
 
-  // Remove saved recipe
+  // ------------------------------------------------------------------
+  // 3. UPDATED removeSaved (using showConfirm and showAlert)
+  // ------------------------------------------------------------------
   const removeSaved = async (recipeId) => {
-    const sure = confirm("Remove this recipe from your saved list?");
+    const sure = await showConfirm(
+      "Remove Recipe?",
+      "Remove this recipe from your saved list?"
+    );
     if (!sure) return;
 
     try {
@@ -228,15 +241,30 @@ export default function Profile() {
       setSaved((list) =>
         list.filter((r) => String(r.recipeId) !== String(recipeId))
       );
+      showAlert(
+        "Removed",
+        "Recipe successfully removed from saved list.",
+        "success"
+      );
     } catch (e) {
-      alert(e.message || "Failed to remove saved recipe.");
+      showAlert(
+        "Error",
+        e.message || "Failed to remove saved recipe.",
+        "error"
+      );
     }
   };
 
-  // Delete a post (from Profile > Your Posts)
+  // ------------------------------------------------------------------
+  // 4. UPDATED removePost (using showConfirm and showAlert)
+  // ------------------------------------------------------------------
   const removePost = async (postId) => {
-    const sure = confirm("Delete this post?");
+    const sure = await showConfirm(
+      "Delete Post?",
+      "Are you sure you want to permanently delete this post?"
+    );
     if (!sure) return;
+
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new Error("Not authenticated");
@@ -249,13 +277,15 @@ export default function Profile() {
         throw new Error(data?.error || `Delete failed (HTTP ${res.status})`);
       }
       setMyPosts((list) => list.filter((p) => p.id !== postId));
+      showAlert(
+        "Deleted",
+        "Your post has been successfully deleted.",
+        "success"
+      );
     } catch (e) {
-      alert(e.message || "Failed to delete post.");
+      showAlert("Error", e.message || "Failed to delete post.", "error");
     }
   };
-
-  // 4. REMOVE ALL JOURNEY-RELATED CRUD FUNCTIONS (addJourneyEntry, deleteJourneyEntry, etc.)
-  // Note: These functions were not present in the provided file's scope.
 
   // Filter saved list
   const filteredSaved = useMemo(() => {
@@ -356,8 +386,6 @@ export default function Profile() {
       </div>
     </div>
   );
-
-  // 5. REMOVE THE ENTIRE renderJourneyTab FUNCTION
 
   return (
     <div className="pf-container">

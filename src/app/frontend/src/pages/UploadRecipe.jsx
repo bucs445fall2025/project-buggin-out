@@ -127,7 +127,7 @@ export default function UploadRecipe() {
 
   return (
     <div className="posts-page">
-      <div className="feed-shell">
+      <div className="feed-shell" data-aos="fade-up">
         <div className="feed-left">
           <section className="composer-card">
             <div className="composer-head">
