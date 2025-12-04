@@ -1,47 +1,55 @@
-# << Project Title >>
+# Forkcast
 ## CS 445 Final Project
-### << Semester, Year >>
+### Fall, 2025
 
-### Team: << team name >>
-<< List Team Members >>
+### Team: Buggin Out
+Johnny Lu
+Alvin Thomas
+Muhammad Chaudhry
 
 ## Getting Started
-<<One paragraph of project description goes here>>
+Forkcast is an application that allows you to browse, create, and share food recipes along with different features such as displaying a list of necessary ingredients as well as food macros!
 
 ### Roadmap
-  <<
-A list of features, function or non-functional, you would like to add in the future if you had time, i.e. Phase 2 stuff
-- [ ] Add Changelog
-- [ ] Add back to top links
-- [ ] Add Additional Templates w/ Examples
-- [ ] Add "components" document to easily copy & paste sections of the readme
-  >>
-  
+- [ ] Journal entry that displays on profile
+- [ ] Peer to peer communication via DMs
+- [ ] Export grocery list to PDF
+
 ## SRS
-[document](url to google doc)
-  
+[document](https://docs.google.com/document/d/1OlTKNSUKXr8yh3ZJ1dgo0_jMl57zAS1IpWYFoDg3q2g/edit?tab=t.0)
+
 ### Prerequisites
 * [Docker](https://www.docker.com/)
-* <<any additional software. Be specific about versions.>>
 
 ### Installing
-<<
- A step by step series of examples that tell you how to get a development env running
-Say what the step will be  
-`Give the example`  
-And repeat  
-`until finished`  
-End with an example of getting some output from the system, such as a menu or prompt
->>
+Clone the repository in your local directory
+Change to the app directory
+Run docker compose up
+Once prompt on terminal displays "Server is running", installation was successful
 
 ## Built With
- << list all frameworks and modules used here >>
-* [requests](https://docs.python-requests.org/en/latest/user/quickstart/#make-a-request) - request for humans
+* [vite](https://vite.dev/guide/)
+* [bcryptjs](https://www.npmjs.com/package/bcryptjs)
+* [react](https://react.dev/blog/2024/12/05/react-19)
+* [react-dom](https://www.npmjs.com/package/react-dom)
+* [react-router-dom](https://www.npmjs.com/package/react-router-dom)
+* [@prisma/client](https://www.prisma.io/docs/orm/prisma-client)
+* [axios](https://axios-http.com/docs/intro)
+* [dotenv](https://www.npmjs.com/package/dotenv)
+* [cloudinary](https://cloudinary.com/documentation/image_upload_api_reference)
+* [cors](https://www.npmjs.com/package/cors)
+* [express](https://expressjs.com/en/starter/installing.html)
+* [jsonwebtoken](https://www.npmjs.com/package/jsonwebtoken)
+* [multer](https://www.npmjs.com/package/multer)
+* [multer-storage-cloudinary](https://www.npmjs.com/package/multer-storage-cloudinary?activeTab=dependents)
+* [nodemon](https://www.npmjs.com/package/nodemon)
+* [cross-env](https://www.npmjs.com/package/cross-env)
+* [prisma](https://www.prisma.io/docs)
+* [aos](https://michalsnik.github.io/aos/)
+* [sweetalert2](https://sweetalert2.github.io/)
 
 ## License
-<< Add a [license](https://choosealicense.com/) >>
+MIT License
 
 ## Acknowledgments
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+The lovely people of CS445

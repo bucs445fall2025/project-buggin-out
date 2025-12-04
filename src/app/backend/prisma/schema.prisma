@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  passwordHash String
+  createdAt    DateTime      @default(now())
+  profile      Profile?
+  recipes      Recipe[]
+  savedRecipes SavedRecipe[]
+  posts       Post[]
+  postComments PostComment[]
+  postLikes    PostLike[]
+}
+
+model Profile {
+  id          Int    @id @default(autoincrement())
+  userId      Int    @unique
+  displayName String @default("")
+  bio         String @default("")
+  avatarUrl   String @default("")
+  user        User   @relation(fields: [userId], references: [id])
+}
+
+
+model Recipe {
+  id                 Int           @id @default(autoincrement())
+  title              String
+  description        String?
+  createdAt          DateTime      @default(now())
+  userId             Int
+  groceryIngredients Grocery[]
+  macroEntries       Macro[]
+  user               User          @relation(fields: [userId], references: [id])
+}
+
+model SavedRecipe {
+  id       Int    @id @default(autoincrement())
+  userId   Int
+  recipeId String   // Only storing MealDB ID now (string)
+
+  user     User   @relation(fields: [userId], references: [id])
+}
+
+model Grocery {
+  id       Int    @id @default(autoincrement())
+  name     String
+  quantity Float
+  unit     String
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+}
+
+model Macro {
+  id       Int    @id @default(autoincrement())
+  calories Float
+  protein  Float
+  carbs    Float
+  fat      Float
+  recipeId Int
+  recipe   Recipe @relation(fields: [recipeId], references: [id])
+}
+
+model Post {
+  id           Int       @id @default(autoincrement())
+  title        String
+  category     String
+  area         String
+  ingredients  Json      // array of { name, measure }
+  instructions String
+  content      String?   // optional description
+  imageUrl     String?
+  createdAt    DateTime  @default(now())
+
+  userId       Int
+  user         User      @relation(fields: [userId], references: [id])
+
+  comments     PostComment[]
+  likes        PostLike[]
+}
+
+
+model PostComment {
+  id        Int      @id @default(autoincrement())
+  body      String
+  createdAt DateTime @default(now())
+
+  postId    Int
+  userId    Int
+
+  post      Post @relation(fields: [postId], references: [id])
+  user      User @relation(fields: [userId], references: [id])
+}
+
+model PostLike {
+  id        Int      @id @default(autoincrement())
+
+  postId    Int
+  userId    Int
+  createdAt DateTime @default(now())
+
+  post      Post @relation(fields: [postId], references: [id])
+  user      User @relation(fields: [userId], references: [id])
+
+  @@unique([postId, userId]) // prevents double likes
+}
+
+
+

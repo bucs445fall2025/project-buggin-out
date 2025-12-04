@@ -1,0 +1,89 @@
+.navbar {
+  height: 70px; 
+  line-height: 70px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: #1e1e1e;
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box; 
+  z-index: 500;
+}
+
+/* our brand */
+.name {
+  font-size: 1.7rem;
+  font-weight: bold;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+/* ====================================================================
+   RECIPES, GROCERY, MACRO TRACKER, PROFILE SECTION
+   ==================================================================== */
+   
+.nav-center {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-center a {
+  color: #dddddd;
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: color 0.2s;
+  padding-left: 25px;
+  padding-right: 25px;
+  
+}
+
+.nav-center a:hover {
+  color: #ffffff;
+}
+
+/* ====================================================================
+   RIGHT SECTION FOR SIGN UP, LOGIN, AND SIGNOUT
+   ==================================================================== */
+
+.nav-right {
+  list-style: none;
+  display: flex;
+  gap: 1rem;
+}
+
+.btn {
+  text-decoration: none;
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 0.6rem;
+  font-weight: 500;
+  transition: background 0.25s;
+}
+
+.signup {
+  background: #7fa3f0;
+}
+
+.signup:hover {
+  background: #7fa3f0;
+}
+
+.login {
+  background: rgb(199, 195, 195);
+}
+
+.login:hover {
+  background: #555;
+}
+
+.signout {
+  background: rgb(199, 195, 195);
+}
+
+.signout:hover {
+  background: #555;
+}

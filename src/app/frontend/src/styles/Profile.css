@@ -1,0 +1,527 @@
+/* ===========================
+   GLOBAL
+=========================== */
+
+.pf-container {
+  background: #f4f4f7;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.pf-shell {
+  margin-top: 4rem;
+  width: min(1200px, 94vw);
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 1.5rem;
+}
+
+/* ===========================
+   MODAL
+=========================== */
+
+/* ===== MODAL BACKDROP ===== */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(77, 107, 198, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+/* ===== MODAL BOX ===== */
+.modal-content {
+  background: #1a1a1a;
+  width: min(450px, 90vw);
+  padding: 24px;
+  border-radius: 14px;
+  box-shadow: 0px 12px 40px rgba(0, 0, 0, 0.4);
+  animation: modalPop 0.25s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@keyframes modalPop {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* ===== CLOSE BUTTON ===== */
+.modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #646cff;
+  font-size: 20px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.submit-btn .cancel-btn {
+  font-size: 16px;
+}
+/* ===== TITLE ===== */
+.modal-content h2 {
+  margin: 0;
+  margin-bottom: 4px;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+}
+
+/* ===== INPUT FIELDS ===== */
+.modal-content input,
+.modal-content textarea {
+  width: 100%;
+  padding: 10px 12px;
+  background: #2a2a2a;
+  border: 1px solid #3a3a3a;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.95rem;
+  outline: none;
+  resize: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modal-content input:focus,
+.modal-content textarea:focus {
+  border-color: #6b7cff;
+  box-shadow: 0 0 0 3px rgba(106, 120, 255, 0.25);
+}
+
+/* ===== FILE INPUT ===== */
+.modal-content input[type="file"] {
+  padding: 6px;
+  background: transparent;
+  border: none;
+  color: #ddd;
+}
+
+/* ===== BUTTON ROW ===== */
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+/* ===== BUTTONS ===== */
+.modal-buttons button {
+  padding: 9px 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.15s, background 0.2s;
+}
+
+/* Submit */
+.modal-submit {
+  background: #6d7cff;
+  color: white;
+}
+.modal-submit:hover {
+  transform: translateY(-2px);
+}
+
+/* Cancel */
+.modal-cancel {
+  background: #333;
+  color: white;
+}
+.modal-cancel:hover {
+  background: #444;
+}
+
+.pf-textarea {
+  width: 100%;
+  height: 4rem;
+  border: 1px solid #d6d6d6;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.pf-edit {
+  background: #646cff;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.08s ease;
+}
+
+.pf-edit:hover {
+  transform: translateY(-2px);
+}
+
+/* ===========================
+   LEFT SIDEBAR
+=========================== */
+
+.pf-left {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  margin: 0 auto 14px;
+  background: #e9e9e9;
+  border: 2px solid #ddd;
+}
+
+.pf-name {
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin-bottom: 6px;
+  text-align: center;
+}
+
+.pf-bio {
+  color: #666;
+  line-height: 1.4;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* menu buttons */
+.pf-menu {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.pf-menu-btn {
+  background: #fafafa;
+  border-radius: 12px;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid #e4e4e4;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.15s ease, box-shadow 0.2s ease;
+}
+
+.pf-menu-btn:hover {
+  background: #ffffff;
+  box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.07);
+}
+
+/* ===========================
+   RIGHT CONTENT CARD
+=========================== */
+
+.pf-right {
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Tabs */
+.pf-tabs {
+  display: flex;
+  gap: 1.5rem;
+  padding: 16px 20px 0 20px;
+  border-bottom: 1px solid #ededed;
+}
+
+.pf-tab {
+  background: transparent;
+  border: none;
+  padding: 12px 4px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  color: #555;
+  position: relative;
+}
+
+.pf-tab.active {
+  color: #111;
+}
+
+.pf-tab.active::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 3px;
+  background: #646cff;
+  border-radius: 3px 3px 0 0;
+}
+
+.pf-content {
+  padding: 20px;
+  min-height: 360px;
+}
+
+.pf-content-placeholder {
+  background: #fff;
+  border: 1px dashed #d4d4d4;
+  border-radius: 14px;
+  padding: 28px;
+  color: #777;
+  display: grid;
+  place-items: center;
+}
+
+/* ===========================
+   SAVED RECIPES
+=========================== */
+
+.pf-saved-wrap {
+  display: grid;
+  gap: 16px;
+}
+
+.pf-saved-head {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 14px;
+  align-items: center;
+}
+
+.pf-saved-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+}
+
+.pf-saved-search {
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid #dcdcdc;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pf-saved-search:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.18);
+}
+
+/* grid */
+.pf-saved-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.pf-saved-card {
+  background: #ffffff;
+  border: 1px solid #ececec;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.1s ease, box-shadow 0.15s ease;
+}
+
+.pf-saved-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 22px rgba(100, 108, 255, 0.18);
+}
+
+.pf-saved-img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  background: #f2f2f2;
+}
+
+.pf-post-img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  margin-top: 12px;
+}
+
+.pf-saved-body {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  padding: 12px 14px;
+  gap: 10px;
+}
+
+.pf-saved-name {
+  font-weight: 600;
+  color: #222;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.pf-saved-remove {
+  border: 1px solid #e5e5e5;
+  background: transparent;
+  color: red;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+
+.pf-saved-remove:hover {
+  background: #fff0f1;
+  border-color: #ffc0c6;
+  color: #8a0010;
+  box-shadow: 0 0 0 3px rgba(255, 0, 0, 0.08);
+}
+
+/* ===========================
+   JOURNEY (Diary)
+=========================== */
+
+.pf-journey-wrap {
+  display: grid;
+  gap: 18px;
+}
+
+.pf-journey-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.pf-journey-form {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+  display: grid;
+  gap: 14px;
+}
+
+.pf-journey-input,
+.pf-journey-textarea {
+  border-radius: 12px;
+  padding: 10px 14px;
+  border: 1px solid #dcdcdc;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pf-journey-input:focus,
+.pf-journey-textarea:focus {
+  border-color: #646cff;
+  box-shadow: 0 0 0 3px rgba(100, 108, 255, 0.18);
+}
+
+.pf-journey-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pf-journey-save {
+  background: #646cff;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.08s ease;
+}
+
+.pf-journey-save:hover {
+  transform: translateY(-2px);
+}
+
+.pf-journey-list {
+  display: grid;
+  gap: 14px;
+}
+
+.pf-journey-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  border: 1px solid #e9e9e9;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+}
+
+.pf-journey-head {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  margin-bottom: 8px;
+}
+
+.pf-journey-card-title {
+  font-weight: 700;
+  color: #111;
+}
+
+.pf-journey-delete {
+  border: 1px solid #e5e5e5;
+  background: #fafafa;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.pf-journey-delete:hover {
+  background: #fff0f1;
+  border-color: #ffc0c6;
+  color: #8a0010;
+}
+
+.pf-journey-content {
+  white-space: pre-wrap;
+  color: #333;
+  line-height: 1.5;
+}
+
+/* ===========================
+   RESPONSIVE
+=========================== */
+
+@media (max-width: 800px) {
+  .pf-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .pf-saved-head {
+    grid-template-columns: 1fr;
+  }
+  .pf-saved-search {
+    width: 100%;
+  }
+}
