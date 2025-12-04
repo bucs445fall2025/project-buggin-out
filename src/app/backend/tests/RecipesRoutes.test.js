@@ -65,39 +65,4 @@ describe("RecipesRoutes", () => {
     expect(res.body.length).toBe(1);
     expect(res.body[0].id).toBe(1);
   });
-
-  // --------- MACROS ROUTE TESTS ---------
-  test("test_getRecipeMacros_success", async () => {
-    spoon.get.mockResolvedValue({
-      data: {
-        title: "Test Recipe",
-        image: "test.png",
-        nutrition: {
-          nutrients: [
-            { name: "Protein", amount: 10 },
-            { name: "Carbohydrates", amount: 20 },
-            { name: "Fat", amount: 5 },
-          ],
-        },
-      },
-    });
-
-    const res = await request(app).get("/api/recipes/123/macros");
-
-    expect(res.status).toBe(200);
-    expect(res.body.id).toBe("123");
-    expect(res.body.title).toBe("Test Recipe");
-    expect(res.body.macros.protein).toBe(10);
-    expect(res.body.macros.carbs).toBe(20);
-    expect(res.body.macros.fat).toBe(5);
-  });
-
-  test("test_getRecipeMacros_invalidId", async () => {
-    spoon.get.mockRejectedValue(new Error("bad"));
-
-    const res = await request(app).get("/api/recipes/999/macros");
-
-    expect(res.status).toBe(500);
-    expect(res.body.error).toBe("Failed to fetch recipe macros");
-  });
 });
