@@ -13,6 +13,7 @@ Forkcast is an application that allows you to browse, create, and share food rec
 ### Roadmap
 - [ ] Journal entry that displays on profile
 - [ ] Peer to peer communication via DMs
+- [ ] Export grocery list to PDF
 
 ## SRS
 [document](https://docs.google.com/document/d/1OlTKNSUKXr8yh3ZJ1dgo0_jMl57zAS1IpWYFoDg3q2g/edit?tab=t.0)
@@ -42,6 +43,10 @@ Once prompt on terminal displays "Server is running", installation was successfu
 * [multer](https://www.npmjs.com/package/multer)
 * [multer-storage-cloudinary](https://www.npmjs.com/package/multer-storage-cloudinary?activeTab=dependents)
 * [nodemon](https://www.npmjs.com/package/nodemon)
+* [cross-env](https://www.npmjs.com/package/cross-env)
+* [prisma](https://www.prisma.io/docs)
+* [aos](https://michalsnik.github.io/aos/)
+* [sweetalert2](https://sweetalert2.github.io/)
 
 ## License
 MIT License
